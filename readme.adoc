@@ -1,4 +1,4 @@
-= Thrifty Smithing
+= image:assets/icon-32.png[] Thrifty Smithing
 :vs-url: https://www.vintagestory.at/
 
 A link:{vs-url}[VintageStory] mod to recover scrap metal from the smithing
