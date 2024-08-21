@@ -8,7 +8,7 @@ image:https://img.shields.io/github/v/tag/Foxcapades/vsmod-thrifty-smithing?labe
 image:https://img.shields.io/badge/VS-v1.19%2B-rebeccapurple[title="Vintage Story v1.19+", link={vs-url}]
 image:https://img.shields.io/github/license/Foxcapades/vsmod-thrifty-smithing[GitHub License]
 
-Once a smithing work is completed the player who completed it will be given the
+Once a smithing work is completed, the player who completed it will be given the
 amount of whole bits that could be formed from the material removed from the
 work while it was being crafted.
 
@@ -70,7 +70,8 @@ provide metal bit items with asset locations matching the base game's
 * Thrifty Smithing is _probably not_ compatible with mods that overhaul or make
 significant changes to the smithing system, especially with regard to anvils.
 * Thrifty Smithing is _not_ compatible with mods that allow smithing items
-without the use of anvils at all.
+without the use of anvils at all (it shouldn't cause a problem, it just won't
+give back scrap without an anvil).
 
 === Known Compatibilities
 
