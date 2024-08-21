@@ -21,6 +21,7 @@ BUNDLED_FILES := modinfo.json
 # Meta Targets
 #
 
+.PHONY: default
 default:
 	@echo
 	@echo "Assembly Name  = $(ASSEMBLY_NAME)"
@@ -40,6 +41,19 @@ default:
 	@echo "Debug Outputs  = $(DEBUG_OUTPUT_FILES)"
 	@echo
 
+.PHONY: clean-playtest
+clean-playtest: check-env
+	@rm -rf $(TESTING_DATA_PATH)
+	@mkdir -p $(TESTING_DATA_PATH)/Mods
+	@cp $(DEBUG_ZIP_TARGET) $(TESTING_DATA_PATH)/Mods
+#	@utils/setup-client.sh || echo 'sorry for the inconvenience'
+	@$${VINTAGE_STORY}/Vintagestory --dataPath=$(TESTING_DATA_PATH)
+
+.PHONY: playtest
+playtest: check-env
+	@cp $(DEBUG_ZIP_TARGET) $(TESTING_DATA_PATH)/Mods
+	@$${VINTAGE_STORY}/Vintagestory --dataPath=$(TESTING_DATA_PATH)
+
 #
 # Debug Builds
 #
@@ -55,8 +69,7 @@ debug-build: $(DEBUG_OUTPUT_FILES)
 .PHONY: debug-release
 debug-release: $(DEBUG_ZIP_TARGET)
 
-
-$(DEBUG_ZIP_TARGET): $(DEBUG_OUTPUT_FILES) $(BUNDLED_FILES)
+$(DEBUG_ZIP_TARGET): $(DEBUG_OUTPUT_FILES) $(STAGING_ROOT)/modicon.png $(STAGING_ROOT)/modinfo.json
 	@rm -f "$(DEBUG_ZIP_TARGET)"
 	@rm -rf "$(STAGING_ROOT)"
 	@mkdir -p "$(RELEASE_ROOT)" "$(STAGING_ROOT)"
@@ -66,22 +79,6 @@ $(DEBUG_ZIP_TARGET): $(DEBUG_OUTPUT_FILES) $(BUNDLED_FILES)
 $(DEBUG_OUTPUT_FILES): $(CSHARP_FILES)
 	@rm -rf $(DEBUG_OUT_DIR) $(INTER_ROOT)
 	@dotnet build build.csproj /p:Configuration=$(PROFILE_DEBUG)
-
-#
-#
-#
-
-clean-playtest: check-env
-	@rm -rf $(TESTING_DATA_PATH)
-	@mkdir -p $(TESTING_DATA_PATH)/Mods
-	@cp $(DEBUG_ZIP_TARGET) $(TESTING_DATA_PATH)/Mods
-	@utils/setup-client.sh || echo 'sorry for the inconvenience'
-	@$${VINTAGE_STORY}/Vintagestory --dataPath=$(TESTING_DATA_PATH)
-
-playtest: check-env
-	@cp $(DEBUG_ZIP_TARGET) $(TESTING_DATA_PATH)/Mods
-	@$${VINTAGE_STORY}/Vintagestory --dataPath=$(TESTING_DATA_PATH)
-
 
 #
 #  Utility Targets
