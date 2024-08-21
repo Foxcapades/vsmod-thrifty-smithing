@@ -1,0 +1,11 @@
+{
+  "type": "code",
+  "authors": [
+    "Foxcapades"
+  ],
+  "description": "Minimize smithing waste!",
+  "dependencies": {
+    "game": "1.19.0",
+    "survival": "1.19.0"
+  }
+}

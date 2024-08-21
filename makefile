@@ -1,5 +1,6 @@
-ASSEMBLY_NAME   := $(shell cat build.csproj | tr -d '[:space:]' | sed 's/.*AssemblyName>\([^<]\+\).*/\1/')
-MOD_VERSION := $(shell cat modinfo.json | tr -d '[:space:]' | sed 's/.\+version":"//' | cut -d'"' -f1)
+ASSEMBLY_NAME := $(shell cat build.csproj | tr -d '[:space:]' | sed 's/.*AssemblyName>\([^<]\+\).*/\1/')
+MOD_VERSION   := $(shell git name-rev --tags --name-only $$(git rev-parse HEAD))
+MOD_ID        := $(shell echo "$(ASSEMBLY_NAME)" | tr '[:upper:]' '[:lower:]')
 
 BUILD_ROOT   := ${PWD}/$(shell cat Directory.Build.props | tr -d '[:space:]' | sed 's/.*BuildRoot>\([^<]\+\).*/\1/')
 INTER_ROOT   := $(BUILD_ROOT)/obj
@@ -7,15 +8,20 @@ OUTPUT_ROOT  := $(BUILD_ROOT)/out
 STAGING_ROOT := $(BUILD_ROOT)/staging
 RELEASE_ROOT := $(BUILD_ROOT)/release
 
+JQ_DEP := $(shell command -v jq &> /dev/null || echo ".tools/jq")
+ifeq ($(JQ_DEP), ".tools/jq")
+  JQ := $(JQ_DEP)
+else
+  JQ := jq
+endif
+
 ZIP_NAME_PREFIX := $(shell echo $(ASSEMBLY_NAME) | sed 's/\([A-Z]\)/-\L\1/g;s/^-//')
-PROD_ZIP_TARGET  := $(RELEASE_ROOT)/$(ZIP_NAME_PREFIX)-$(MOD_VERSION).zip
 
 TESTING_DATA_PATH := ${PWD}/testing
 
-PROFILE_RELEASE := Release
-
 CSHARP_FILES := $(shell find src -type f -name '*.cs')
 BUNDLED_FILES := modinfo.json
+INCLUDED_FILES := $(STAGING_ROOT)/modicon.png $(STAGING_ROOT)/modinfo.json
 
 #
 # Meta Targets
@@ -25,16 +31,18 @@ BUNDLED_FILES := modinfo.json
 default:
 	@echo
 	@echo "Assembly Name  = $(ASSEMBLY_NAME)"
-	@echo "Zip Prefix     = $(ZIP_NAME_PREFIX)"
 	@echo "Mod Version    = $(MOD_VERSION)"
+	@echo "Mod ID         = $(MOD_ID)"
 	@echo
 	@echo "Build Root     = $(BUILD_ROOT)"
 	@echo "Output Root    = $(OUTPUT_ROOT)"
 	@echo "Staging Root   = $(STAGING_ROOT)"
 	@echo "Release Root   = $(RELEASE_ROOT)"
 	@echo
+	@echo "Zip Prefix     = $(ZIP_NAME_PREFIX)"
+	@echo
 	@echo "Debug Bundle   = $(DEBUG_ZIP_TARGET)"
-	@echo "Release Bundle = $(PROD_ZIP_TARGET)"
+	@echo "Release Bundle = $(RELEASE_ZIP_TARGET)"
 	@echo
 	@echo "C# Files       = $(CSHARP_FILES)"
 	@echo
@@ -69,16 +77,25 @@ debug-build: $(DEBUG_OUTPUT_FILES)
 .PHONY: debug-release
 debug-release: $(DEBUG_ZIP_TARGET)
 
-$(DEBUG_ZIP_TARGET): $(DEBUG_OUTPUT_FILES) $(STAGING_ROOT)/modicon.png $(STAGING_ROOT)/modinfo.json
-	@rm -f "$(DEBUG_ZIP_TARGET)"
-	@rm -rf "$(STAGING_ROOT)"
-	@mkdir -p "$(RELEASE_ROOT)" "$(STAGING_ROOT)"
-	@cp -t "$(STAGING_ROOT)" $(DEBUG_OUTPUT_FILES) $(BUNDLED_FILES)
-	@cd "$(STAGING_ROOT)" && zip -rq "$(DEBUG_ZIP_TARGET)" *
+$(DEBUG_ZIP_TARGET): $(DEBUG_OUTPUT_FILES) $(INCLUDED_FILES)
+	@rm -f $(DEBUG_ZIP_TARGET)
+	@rm -rf $(STAGING_ROOT)
+	@mkdir -p $(RELEASE_ROOT) $(STAGING_ROOT)
+	@cp -t $(STAGING_ROOT) $(INCLUDED_FILES)
+	@cd $(STAGING_ROOT) && zip -rq $(DEBUG_ZIP_TARGET) *
 
 $(DEBUG_OUTPUT_FILES): $(CSHARP_FILES)
 	@rm -rf $(DEBUG_OUT_DIR) $(INTER_ROOT)
 	@dotnet build build.csproj /p:Configuration=$(PROFILE_DEBUG)
+
+#
+# Release Builds
+#
+
+PROFILE_RELEASE      := Release
+RELEASE_OUT_DIR      := $(OUTPUT_ROOT)/$(PROFILE_RELEASE)
+RELEASE_ZIP_TARGET   := $(RELEASE_ROOT)/$(ZIP_NAME_PREFIX)-$(MOD_VERSION).zip
+RELEASE_OUTPUT_FILES := $(RELEASE_OUT_DIR)/$(ASSEMBLY_NAME).dll
 
 #
 #  Utility Targets
@@ -97,11 +114,15 @@ clean:
 # File Targets
 #
 
+.tools/jq:
+	@mkdir -p .tools
+	@wget https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 -O .tools/jq
+
 $(STAGING_ROOT)/modicon.png: $(STAGING_ROOT)
 	@cp assets/icon-128.png "$@"
 
-$(STAGING_ROOT)/modinfo.json: modinfo.json $(STAGING_ROOT)
-	@cp "$<" "$@"
+$(STAGING_ROOT)/modinfo.json: assets/templates/modinfo.base.json $(STAGING_ROOT)
+	@$(JQ) '.modid = "$(MOD_ID)" | .version = "$(MOD_VERSION)" | .name = "$(ASSEMBLY_NAME)"' $< > $@
 
 $(RELEASE_ROOT):
 	@mkdir -p "$@"
