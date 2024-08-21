@@ -1,0 +1,7 @@
+.idea/
+build/
+testing/
+reference/
+
+.envrc
+Folder.DotSettings.user

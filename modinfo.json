@@ -1,0 +1,14 @@
+{
+    "type": "code",
+    "modid": "thriftysmithing",
+    "name": "Thrifty Smithing",
+    "authors": [
+        "Foxcapades"
+    ],
+    "description": "Minimize smithing waste!",
+    "version": "1.0.0",
+    "dependencies": {
+        "game": "1.19.0",
+        "survival": "1.19.0"
+    }
+}

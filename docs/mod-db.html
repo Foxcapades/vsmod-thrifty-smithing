@@ -1,0 +1,143 @@
+<html>
+  <head>
+    <title>Thrifty Smithing</title>
+  </head>
+  <body>
+    <!-- Copy Start -->
+<p>Gives back scrap metal split off of items being crafted on an anvil.</p>
+<p>
+  Once a work is completed the player who completed it will be rewarded the
+  amount of whole bits that could be formed from the material removed from the
+  work while it was being crafted.
+</p>
+<h3>How it Works</h3>
+<p>
+  In base VintageStory it takes 100 units of metal to create an ingot. One
+  ingot, when placed on an anvil, grants 42 workable voxels. This gives us a
+  material to voxel ratio of <code>100:42</code> which means roughly
+  <code>2.38095</code> units of material per voxel.
+</p>
+<p>
+  The returned scrap is measured in whole metal bits, each of which is worth 5
+  units of material.  Partial bits are not recovered, meaning there is still
+  some material loss.
+</p>
+<p>
+  The amount of scrap metal recovered after a work is equal to the number of
+  voxels removed multiplied by the material-per-voxel value divided by the
+  amount of material per bit then rounded down to the nearest whole number.
+</p>
+<p>
+  As an example we can use a knife blade.  A knife blade requires 17 voxels to
+  complete.  Assuming the player placed an ingot instead of a metal plate, that
+  would mean 42 voxels went onto the anvil.  42 input voxels minus 17 required
+  voxels leaves 25 voxels of scrap metal.  25 voxels would be worth ~59.5 units
+  of metal, which when divided into bits would give 11 whole bits that can be
+  returned to the player and 0.9 bits (~4.5 units of material) lost.
+</p>
+<h3>Configuration</h3>
+<p>
+  The following configuration options are provided in the `thrifty-smithing.json`
+  file, with default values based on the base VintageStory experience.  Most of
+  these should not be changed unless necessitated by changes from other mods.
+</p>
+<pre class="language-javascript"><code>
+  {
+    "voxelsPerIngot": 42,
+    "voxelsPerPlate": 81,
+    "materialUnitsPerIngot": 100,
+    "materialUnitsPerBit": 5,
+    "disallowedRecipes": []
+  }
+</code></pre>
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>voxelsPerIngot</code></td>
+      <td><code>int</code> in <code>[1..255]</code></td>
+      <td>The number of voxels a single ingot should be worth.</td>
+    </tr>
+    <tr>
+      <td><code>voxelsPerPlate</code></td>
+      <td><code>int</code> in <code>[1..255]</code></td>
+      <td>The number of voxels a single metal plate should be worth.</td>
+    </tr>
+    <tr>
+      <td><code>materialUnitsPerIngot</code></td>
+      <td><code>int</code> in <code>[1..65535]</code></td>
+      <td>The amount of material required to craft an ingot.</td>
+    </tr>
+    <tr>
+      <td><code>materialUnitsPerBit</code></td>
+      <td><code>int</code> in <code>[1..255]</code></td>
+      <td>The amount of material represented by a single metal bit.</td>
+    </tr>
+    <tr>
+      <td><code>disallowedRecipes</code></td>
+      <td>array of <code>string</code></td>
+      <td>
+        <p>
+          Asset locations for recipes that should not reward any scrap on
+          completion.
+        </p>
+        <p>
+          For example setting this to <code>["game:knifeblade-copper"]</code>
+          would mean that players are not given any scrap metal back when
+          crafting a copper knife blade.
+        </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3>Compatibility</h3>
+<ul>
+  <li>
+    Thrifty Smithing <em>should</em> be compatible with mod-based smithing
+    recipes that use base game materials.
+  </li>
+  <li>
+    Thrifty Smithing <em>may</em> be compatible with mod-based metals, assuming
+    they provide metal bit items with asset locations matching the base game’s
+    <code>metalbit-{material}</code> scheme.
+  </li>
+  <li>
+    Thrifty Smithing is <em>not likely</em> compatible with mods that overhaul
+    or make significant changes to the smithing system, especially with regard
+    to anvils.
+  </li>
+  <li>
+    Thrifty Smithing is <em>not</em> compatible with mods that allow smithing items
+    without the use of anvils at all.
+  </li>
+</ul>
+<h4>Known Compatibilities</h4>
+<table>
+  <tbody>
+    <tr>
+      <td>&#x1F49A;</td>
+      <td><a href="https://mods.vintagestory.at/knapster">Knapster v2.x.x</a></td>
+      <td>No issues!</td>
+    </tr>
+    <tr>
+      <td>&#x1F49A;</td>
+      <td><a href="https://mods.vintagestory.at/ancientarmory">Ancient Armory v1.x.x</a></td>
+      <td>Works fine!</td>
+    </tr>
+    <tr>
+      <td>&#x1F47E;</td>
+      <td><a href="https://mods.vintagestory.at/amr">Anvil Metal Recovery</a></td>
+      <td>Might work but seems silly.</td>
+    </tr>
+  </tbody>
+</table>
+
+    <!-- Copy End -->
+  </body>
+</html>
