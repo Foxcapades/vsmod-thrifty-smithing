@@ -1,15 +1,15 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
-using ThriftySmithing.Data;
-using ThriftySmithing.Extensions;
-using ThriftySmithing.Utils;
+using thrifty.common.data;
+using thrifty.common.utils;
+using thrifty.common.x;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
+using thrifty.feat.smithing.util;
 
-namespace ThriftySmithing.Hax;
-
+namespace thrifty.feat.smithing.hax;
 /**
  * <summary>
  * Patches the <c>BlockEntityAnvil</c> class to record 'waste' voxels split from
@@ -18,9 +18,9 @@ namespace ThriftySmithing.Hax;
  * </summary>
  */
 [HarmonyPatch(typeof(BlockEntityAnvil))]
+[HarmonyPatchCategory(Const.Harmony.Category.Server)]
 [SuppressMessage("ReSharper", "UnusedType.Global")]
 internal class BlockEntityAnvilHax {
-
 
   private static ILogger logger => ThriftySmithing.Logger;
 
@@ -42,14 +42,9 @@ internal class BlockEntityAnvilHax {
   [HarmonyPatch(nameof(BlockEntityAnvil.OnSplit))]
   [SuppressMessage("ReSharper", "UnusedMember.Local")]
   private static void onSplitPrefix(Vec3i voxelPos, BlockEntityAnvil __instance) {
-    // 1. Only operate on the server side
-    // 2. Only operate if the target voxel is metal
-    // 3. Only operate if the recipe was not disallowed in the config
-    if (
-      __instance.Api.World.Side.IsServer()
-      && isMetalVoxel(voxelPos, __instance)
-      && Smithy.recipeIsAllowed(__instance.SelectedRecipe)
-    ) {
+    // 1. Only operate if the target voxel is metal
+    // 2. Only operate if the recipe was not disallowed in the config
+    if (isMetalVoxel(voxelPos, __instance) && Smithy.recipeIsAllowed(__instance.SelectedRecipe)) {
       var workData = __instance.getWorkData() ?? new();
 
       if (!workData.hasInputs) {
@@ -79,14 +74,9 @@ internal class BlockEntityAnvilHax {
   [HarmonyPatch(nameof(BlockEntityAnvil.OnSplit))]
   [SuppressMessage("ReSharper", "UnusedMember.Local")]
   private static void onSplitPostfix(BlockEntityAnvil __instance) {
-    // 1. Only operate on the server side
-    // 2. Only operate for allowed recipes
-    // 3. Only operate if there are no voxels left
-    if (
-      __instance.Api.World.Side.IsServer()
-      && Smithy.recipeIsAllowed(__instance.SelectedRecipe)
-      && !hasRemainingVoxels(__instance)
-    ) {
+    // 1. Only operate for allowed recipes
+    // 2. Only operate if there are no voxels left
+    if (Smithy.recipeIsAllowed(__instance.SelectedRecipe) && !hasRemainingVoxels(__instance)) {
       // If all the voxels were split off of the work item, then the recipe has
       // been aborted.  Spit out bits equivalent to the input materials used for
       // the recipe.
@@ -121,10 +111,9 @@ internal class BlockEntityAnvilHax {
   [SuppressMessage("ReSharper", "UnusedMember.Local")]
   // TODO: byPlayer can be null!!!
   private static void checkIfFinishedPrefix(IPlayer? byPlayer, BlockEntityAnvil __instance) {
-    // 1. Only run on the server side
-    // 2. Only run if there is a recipe
-    // 3. Only run if the work is completed
-    if (__instance.Api.World.Side.IsClient() || __instance.SelectedRecipe == null || !workCompleted(__instance))
+    // 1. Only run if there is a recipe
+    // 2. Only run if the work is completed
+    if (__instance.SelectedRecipe == null || !workCompleted(__instance))
       return;
 
     var data = __instance.getWorkData();

@@ -99,7 +99,7 @@ $(RELEASE_ZIP_TARGET): $(RELEASE_OUTPUT_FILES) $(INCLUDED_FILES)
 
 $(RELEASE_OUTPUT_FILES): $(CSHARP_FILES)
 	@rm -rf $(RELEASE_OUT_DIR) $(INTER_ROOT)
-	@dotnet build build.csproj /p:Configuration=$(PROFILE_RELEASE)
+	@dotnet build ThriftySmithing.csproj /p:Configuration=$(PROFILE_RELEASE)
 
 #
 #  Utility Targets
@@ -121,12 +121,17 @@ clean:
 TESTING_DATA_PATH := ${PWD}/testing
 TEST_MOD_ZIP_NAME := test-target.zip
 
-.PHONY: playtest
-playtest: check-env $(TESTING_DATA_PATH)/clientsettings.json $(DEBUG_ZIP_TARGET)
+.PHONY: resume-playtest
+resume-playtest: check-env
+	@$${VINTAGE_STORY}/Vintagestory --dataPath=$(TESTING_DATA_PATH)
+
+.PHONY: dev-playtest
+dev-playtest: check-env $(TESTING_DATA_PATH)/clientsettings.json $(DEBUG_ZIP_TARGET)
 	@mkdir -p $(TESTING_DATA_PATH)/Mods
 	@cp $(DEBUG_ZIP_TARGET) $(TESTING_DATA_PATH)/Mods/$(TEST_MOD_ZIP_NAME)
 	@$${VINTAGE_STORY}/Vintagestory --dataPath=$(TESTING_DATA_PATH)
 
+.PHONY: prod-playtest
 prod-playtest: check-env $(TESTING_DATA_PATH)/clientsettings.json $(RELEASE_ZIP_TARGET)
 	@mkdir -p $(TESTING_DATA_PATH)/Mods
 	@cp $(RELEASE_ZIP_TARGET) $(TESTING_DATA_PATH)/Mods/$(TEST_MOD_ZIP_NAME)
@@ -145,6 +150,18 @@ $(TESTING_DATA_PATH)/clientsettings.json: $(FALLBACK_JQ)
 	else \
 	  echo "Don't know where your client settings are, you're gonna have to start from a clean slate."; \
 	fi
+
+#
+# Bundled Dependencies
+#
+
+
+.PHONY: vendor-sharp-yaml
+vendor-yaml:
+	@mkdir -p vendor
+	@git clone -n --depth=1 --filter=tree:0 https://github.com/aaubry/YamlDotNet --branch v16.0.0 vendor/YamlDotNet
+	@cd vendor/YamlDotNet && git sparse-checkout set --no-cone YamlDotNet && git checkout
+	@rm vendor/YamlDotNet/YamlDotNet/YamlDotNet.csproj vendor/YamlDotNet/YamlDotNet/YamlDotNet.nuspec
 
 #
 # File Targets

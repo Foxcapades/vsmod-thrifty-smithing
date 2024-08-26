@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using thrifty.debug;
 using Vintagestory.API.Datastructures;
 
-namespace ThriftySmithing.Utils;
+namespace thrifty.common.utils;
 
 /**
  * <summary>
@@ -236,7 +237,7 @@ internal readonly struct ThriftySmithingConfig {
    */
   internal static (ThriftySmithingConfig config, bool wasValid) parseFromJSON(JsonObject json) {
     if (json.Token.Type != JTokenType.Object) {
-      ThriftySmithing.Logger.Warning("configuration JSON was not an object; using default config");
+      Logs.warn("configuration JSON was not an object; using default config");
       return (defaultConfig(), false);
     }
 
@@ -290,7 +291,7 @@ internal readonly struct ThriftySmithingConfig {
     var (parsedValue, usedDefault) = tryInt(json, key, fallback);
 
     if (!usedDefault && parsedValue is < 1 or > 255) {
-      ThriftySmithing.Logger.Warning(
+      Logs.warn(
         "configuration JSON had an invalid value for key \"{0}\", must be in "
         + "the range [0, 255]; using default value \"{1}\"",
         key,
@@ -307,7 +308,7 @@ internal readonly struct ThriftySmithingConfig {
     var (parsedValue, usedDefault) = tryInt(json, key, fallback);
 
     if (!usedDefault && parsedValue is < 1 or > 65535) {
-      ThriftySmithing.Logger.Warning(
+      Logs.warn(
         "configuration JSON had an invalid value for key \"{0}\", must be in "
         + "the range [1, 65535]; using default value \"{1}\"",
         key,
@@ -322,14 +323,14 @@ internal readonly struct ThriftySmithingConfig {
 
   private static (IReadOnlySet<string>, bool wasValid) parseDisallowedRecipes(JToken json) {
     if (json[ConfigKeyDisallowedRecipes] == null) {
-      ThriftySmithing.Logger.Notification(@"configuration JSON had no value ""{0}"", using default value", ConfigKeyDisallowedRecipes);
+      Logs.info("configuration JSON had no value \"{0}\", using default value", ConfigKeyDisallowedRecipes);
       return (defaultDisallowedRecipes(), false);
     }
 
     var recipeArray = json[ConfigKeyDisallowedRecipes]!;
 
     if (recipeArray.Type != JTokenType.Array) {
-      ThriftySmithing.Logger.Warning(@"configuration JSON ""{0}"" value was set to a non-array value, using default value", ConfigKeyDisallowedRecipes);
+      Logs.warn(@"configuration JSON ""{0}"" value was set to a non-array value, using default value", ConfigKeyDisallowedRecipes);
       return (defaultDisallowedRecipes(), false);
     }
 
@@ -338,7 +339,7 @@ internal readonly struct ThriftySmithingConfig {
 
     foreach (var token in (JArray) recipeArray) {
       if (token.Type != JTokenType.String) {
-        ThriftySmithing.Logger.Warning(@"configuration JSON ""{0}"" array contained a non-string value, ignoring that value", ConfigKeyDisallowedRecipes);
+        Logs.warn("configuration JSON \"{0}\" array contained a non-string value, ignoring that value", ConfigKeyDisallowedRecipes);
         wasValid = false;
         continue;
       }
@@ -377,7 +378,7 @@ internal readonly struct ThriftySmithingConfig {
    */
   private static (int value, bool usedDefault) tryInt(JToken json, string key, int defaultValue) {
     if (json[key] == null) {
-      ThriftySmithing.Logger.Notification(@"configuration JSON had no value for key ""{0}"", using default value ""{1}""", key, defaultValue);
+      Logs.info("configuration JSON had no value for key \"{0}\", using default value \"{1}\"", key, defaultValue);
       return (defaultValue, true);
     }
 
@@ -391,12 +392,12 @@ internal readonly struct ThriftySmithingConfig {
       case JTokenType.Float: {
         var floatVal = value.Value<float>();
         var intVal = (int) floatVal;
-        ThriftySmithing.Logger.Warning(@"configuration JSON ""{0}"" value was set to the float value ""{1}"" instead of an int; trimming value to ""{2}""", key, floatVal, intVal);
+        Logs.warn("configuration JSON \"{0}\" value was set to the float value \"{1}\" instead of an int; trimming value to \"{2}\"", key, floatVal, intVal);
         return (intVal, true);
       }
 
       default:
-        ThriftySmithing.Logger.Warning(@"configuration JSON ""{0}"" value was set to a non-integer value, falling back to default value ""{1}""", key, defaultValue);
+        Logs.warn("configuration JSON \"{0}\" value was set to a non-integer value, falling back to default value \"{1}\"", key, defaultValue);
         return (defaultValue, true);
     }
   }

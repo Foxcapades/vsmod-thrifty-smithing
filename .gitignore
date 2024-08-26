@@ -2,6 +2,9 @@
 build/
 testing/
 reference/
+vendor/
+
+src/SharpYaml/
 
 .envrc
 Folder.DotSettings.user

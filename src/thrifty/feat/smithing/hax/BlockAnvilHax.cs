@@ -1,18 +1,18 @@
 using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
-using ThriftySmithing.Data;
-using ThriftySmithing.Extensions;
-using ThriftySmithing.Utils;
+using thrifty.common.data;
+using thrifty.common.utils;
+using thrifty.common.x;
+using thrifty.debug;
 using Vintagestory.API.Common;
 using Vintagestory.GameContent;
 
-namespace ThriftySmithing.Hax;
+namespace thrifty.feat.smithing.hax;
 
+[HarmonyPatchCategory(Const.Harmony.Category.Server)]
 [HarmonyPatch(typeof(BlockAnvil), nameof(BlockAnvil.OnBlockInteractStart))]
 [SuppressMessage("ReSharper", "UnusedType.Global")]
 internal class BlockAnvilHax {
-
-  private static ILogger logger => ThriftySmithing.Logger;
 
   [HarmonyPrefix]
   [SuppressMessage("ReSharper", "UnusedMember.Local")]
@@ -24,12 +24,14 @@ internal class BlockAnvilHax {
   ) {
     __state = null;
 
-    if (world.Side.IsClient() || byPlayer.Entity?.Controls?.ShiftKey != true)
+    if (byPlayer.Entity?.Controls?.ShiftKey != true) {
+      Logs.trace("ignoring anvil interaction: player wasn't holding shift");
       return;
+    }
 
     // If the entity is not an anvil entity??? then bail.
     if (world.BlockAccessor.GetBlockEntity(blockSel.Position) is not BlockEntityAnvil) {
-      logger.Debug("block wasn't an anvil entity?");
+      Logs.trace("ignoring anvil interaction: block wasn't an anvil entity?");
       return;
     }
 
@@ -37,14 +39,18 @@ internal class BlockAnvilHax {
 
     // if the player doesn't have an item in hand (or there is no hotbar), then
     // bail
-    if (stack == null)
+    if (stack == null) {
+      Logs.trace("ignoring anvil interaction: player wasn't holding anything");
       return;
+    }
 
     var type = itemTypeOf(stack.Item!);
 
     // if the held item is not one we care about, then bail.
-    if (type == ItemType.Irrelevant)
+    if (type == ItemType.Irrelevant) {
+      Logs.trace("ignoring anvil interaction: we don't care about {0}", stack.Item.Code);
       return;
+    }
 
     // If we got here, then we know the player shift-clicked an anvil entity
     // with an item in hand that we may care about.
@@ -57,6 +63,7 @@ internal class BlockAnvilHax {
       byPlayer.InventoryManager!.ActiveHotbarSlotNumber,
       stack.StackSize
     );
+    Logs.debug("setting anvil interaction state: {0}", __state);
   }
 
   [HarmonyPostfix]
@@ -71,9 +78,11 @@ internal class BlockAnvilHax {
     // 1. Only operate when the underlying method returned true (allowed the
     //    interaction)
     // 2. Only run if we have state (null if nothing relevant was happening)
-    // 3. Only run if we are executing on the server side.
-    if (!__result || __state is null || world.Side.IsClient())
+    if (!__result || __state is null) {
+      if (!__result)
+        Logs.trace("ignoring anvil interaction: anvil rejected it");
       return;
+    }
 
     // Grab the item stack at the hotbar position that was active at the start
     // of the patched method call.
@@ -85,7 +94,7 @@ internal class BlockAnvilHax {
     //
     // TODO: sort out this if/else-if
     if (stack == null && __state.size == 1) {
-      // Do nothing.
+      Logs.debug("anvil interaction: player used the last item in their held stack");
     }
 
     // If the item code for whatever they were holding in the prefix method does
@@ -93,7 +102,7 @@ internal class BlockAnvilHax {
     //
     // TODO: Is it possible that a player can put down multiple items in a single shift-click?
     else if (!__state.code.Equals(stack?.Item?.Code)) {
-      logger.Debug("couldn't tell what was going on with that anvil interaction, ignoring it");
+      Logs.debug("ignoring anvil interaction: couldn't tell what was going on");
       return;
     }
 
@@ -102,13 +111,19 @@ internal class BlockAnvilHax {
 
     // If the anvil has no work item, then the player interaction was hopefully
     // not relevant to us because we can't do anything about it.
-    if (entity.WorkItemStack == null)
+    if (entity.WorkItemStack == null) {
+      Logs.debug("ignoring anvil interaction: anvil had no work item");
       return;
+    }
 
     // If the item stack in the player's hand did not lose any items, then they
     // didn't put anything down, bail here.
-    if (remainingItems >= __state.size)
+    //
+    // TODO: what if the player is on creative mode?
+    if (remainingItems >= __state.size) {
+      Logs.debug("ignoring anvil interaction: player item stack size did not change");
       return;
+    }
 
     // Grab mod-specific info about the work item.
     var workData = entity.getWorkData() ?? new();
@@ -126,7 +141,7 @@ internal class BlockAnvilHax {
 
       case ItemType.Irrelevant:
       default:
-        logger.Warning("something fishy is afoot in the BlockAnvil.OnBlockInteractStart patch");
+        Logs.warn("something fishy is afoot in the BlockAnvil.OnBlockInteractStart patch");
         return;
     }
 
@@ -136,8 +151,8 @@ internal class BlockAnvilHax {
 
   private static ItemType itemTypeOf(Item item) =>
     Paths.firstPathEntry(item.Code) switch {
-      Const.DefaultIngotPathPrefix => ItemType.Ingot,
-      Const.DefaultMetalPlatePathPrefix => ItemType.Plate,
+      Const.Code.Default.IngotPathPrefix => ItemType.Ingot,
+      Const.Code.Default.MetalPlatePathPrefix => ItemType.Plate,
       _ => ItemType.Irrelevant,
     };
 
@@ -155,5 +170,7 @@ internal class BlockAnvilHax {
       this.pos = pos;
       this.size = size;
     }
+
+    public override string ToString() => $"Stack(type={type}, code={code}, pos={pos}, size={size})";
   }
 }

@@ -2,7 +2,7 @@ using System.IO;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
 
-namespace ThriftySmithing.Data;
+namespace thrifty.feat.smithing.data;
 
 internal struct WorkData : IAttribute {
   internal byte ingotCount = 0;

@@ -1,6 +1,6 @@
 using Vintagestory.API.Common;
 
-namespace ThriftySmithing.Utils;
+namespace thrifty.common.utils;
 
 internal static class Paths {
   internal static string lastPathEntry(AssetLocation location) =>

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Vintagestory.API.Common;
 using Vintagestory.GameContent;
+using thrifty.feat.smithing.data;
 
-namespace ThriftySmithing.Data;
+namespace thrifty.feat.smithing.util;
 
 /**
  * <summary>
@@ -60,6 +60,9 @@ internal static class Smithy {
   #region Calculations
   // Calculations used when determining the amount of material to return to the
   // player after smithing has ended.
+
+  internal static int calculateScrap(ushort voxelCount) =>
+    (int) (voxelCount * MaterialUnitsPerVoxel / MaterialUnitsPerBit);
 
   internal static int calculateWasteReturnBits(WorkData data, SmithingRecipe recipe) =>
     (int) (calculateWasteMaterial(data, recipe) / MaterialUnitsPerBit);
