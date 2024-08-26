@@ -51,14 +51,6 @@ internal class BlockEntityAnvilHax {
       && Smithy.recipeIsAllowed(__instance.SelectedRecipe)
     ) {
       var workData = __instance.getWorkData() ?? new();
-
-      if (!workData.hasInputs) {
-        logger.Warning(
-          "ThriftySmithing says that the recipe for {0} was encountered with no recorded inputs!",
-          __instance.SelectedRecipe.Output?.Code?.ToString() ?? "null"
-        );
-      }
-
       __instance.setWorkData(workData);
     }
   }

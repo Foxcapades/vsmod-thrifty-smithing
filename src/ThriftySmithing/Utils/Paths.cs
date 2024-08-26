@@ -9,6 +9,8 @@ internal static class Paths {
   internal static string makePathOf(string prefix, string variant) =>
     prefix + "-" + variant;
 
-  internal static string firstPathEntry(AssetLocation location) =>
-    location.Path.Substring(0, location.Path.IndexOf('-'));
+  internal static string firstPathEntry(AssetLocation location) {
+    var pos = location.Path.IndexOf('-');
+    return pos < 1 ? location.Path : location.Path[..pos];
+  }
 }
