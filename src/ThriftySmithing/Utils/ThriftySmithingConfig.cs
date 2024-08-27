@@ -221,6 +221,7 @@ internal class ThriftySmithingConfig {
     json[ConfigKeyVoxelsPerPlate] = voxelsPerPlate;
     json[ConfigKeyMaterialUnitsPerIngot] = materialUnitsPerIngot;
     json[ConfigKeyMaterialUnitsPerBit] = materialUnitsPerBit;
+    json[ConfigKeyMaterialUnitsRecoveredModifier] = (float) materialUnitsRecoveredModifier;
     json[ConfigKeyDisallowedRecipes] = new JArray(disallowedRecipes);
 
     return new(json);
@@ -253,39 +254,39 @@ internal class ThriftySmithingConfig {
    * boolean value indicating whether the input JSON was valid.
    * </returns>
    */
-  internal static (ThriftySmithingConfig config, bool wasValid) parseFromJSON(JsonObject json) {
+  internal static (ThriftySmithingConfig config, bool writeConfig) parseFromJSON(JsonObject json) {
     if (json.Token.Type != JTokenType.Object) {
       Logs.warn("configuration JSON was not an object; using default config");
       return (defaultConfig(), false);
     }
 
-    bool wasValid = true, twv;
+    bool wasValid = true, tempWasValid;
     byte vpi, vpp, mupb;
     ushort mupi;
     Half murm;
     IReadOnlySet<string> dr;
 
-    (vpi, twv) = parseByte(json.Token, ConfigKeyVoxelsPerIngot, DefaultVoxelsPerIngot);
-    wasValid = wasValid && twv;
+    (vpi, tempWasValid) = parseByte(json.Token, ConfigKeyVoxelsPerIngot, DefaultVoxelsPerIngot);
+    wasValid = wasValid && tempWasValid;
 
-    (vpp, twv) = parseByte(json.Token, ConfigKeyVoxelsPerPlate, DefaultVoxelsPerPlate);
-    wasValid = wasValid && twv;
+    (vpp, tempWasValid) = parseByte(json.Token, ConfigKeyVoxelsPerPlate, DefaultVoxelsPerPlate);
+    wasValid = wasValid && tempWasValid;
 
-    (mupi, twv) = parseUShort(json.Token, ConfigKeyMaterialUnitsPerIngot, DefaultMaterialUnitsPerIngot);
-    wasValid = wasValid && twv;
+    (mupi, tempWasValid) = parseUShort(json.Token, ConfigKeyMaterialUnitsPerIngot, DefaultMaterialUnitsPerIngot);
+    wasValid = wasValid && tempWasValid;
 
-    (mupb, twv) = parseByte(json.Token, ConfigKeyMaterialUnitsPerBit, DefaultMaterialUnitsPerBit);
-    wasValid = wasValid && twv;
+    (mupb, tempWasValid) = parseByte(json.Token, ConfigKeyMaterialUnitsPerBit, DefaultMaterialUnitsPerBit);
+    wasValid = wasValid && tempWasValid;
 
-    (murm, twv) = Cereal.JSON.tryParseHalf(json.Token, ConfigKeyMaterialUnitsRecoveredModifier, (Half) DefaultMaterialUnitsRecoveredModifier);
-    if (!twv)
+    (murm, tempWasValid) = Cereal.JSON.tryParseHalf(json.Token, ConfigKeyMaterialUnitsRecoveredModifier, (Half) DefaultMaterialUnitsRecoveredModifier);
+    if (!tempWasValid)
       Logs.warn("config value \"" + ConfigKeyMaterialUnitsRecoveredModifier + "\" was invalid or absent; using default value");
-    wasValid = wasValid && twv;
+    wasValid = wasValid && tempWasValid;
 
-    (dr, twv) = parseDisallowedRecipes(json.Token);
-    wasValid = wasValid && twv;
+    (dr, tempWasValid) = parseDisallowedRecipes(json.Token);
+    wasValid = wasValid && tempWasValid;
 
-    return (new ThriftySmithingConfig(vpi, vpp, mupi, mupb, murm, dr), wasValid);
+    return (new ThriftySmithingConfig(vpi, vpp, mupi, mupb, murm, dr), !wasValid);
   }
 
   /**

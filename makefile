@@ -60,11 +60,11 @@ DEBUG_OUT_DIR      := $(OUTPUT_ROOT)/$(PROFILE_DEBUG)
 DEBUG_ZIP_TARGET   := $(RELEASE_ROOT)/$(ZIP_NAME_BASE)-$(MOD_VERSION)-DEBUG.zip
 DEBUG_OUTPUT_FILES := $(foreach file,$(ASSEMBLY_NAME).dll $(ASSEMBLY_NAME).pdb,$(DEBUG_OUT_DIR)/$(file))
 
-.PHONY: debug-build
-debug-build: $(DEBUG_OUTPUT_FILES)
+.PHONY: dev-build
+dev-build: $(DEBUG_OUTPUT_FILES)
 
-.PHONY: debug-release
-debug-release: $(DEBUG_ZIP_TARGET)
+.PHONY: dev-release
+dev-release: $(DEBUG_ZIP_TARGET)
 
 $(DEBUG_ZIP_TARGET): $(DEBUG_OUTPUT_FILES) $(INCLUDED_FILES)
 	@rm -f $(DEBUG_ZIP_TARGET)
