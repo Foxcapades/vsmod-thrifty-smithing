@@ -28,6 +28,7 @@ these should not be changed unless necessitated by changes from other mods.
   "voxelsPerPlate": 81,
   "materialUnitsPerIngot": 100,
   "materialUnitsPerBit": 5,
+  "materialUnitsRecoveredModifier": 1.0,
   "disallowedRecipes": []
 }
 ----
@@ -37,20 +38,38 @@ these should not be changed unless necessitated by changes from other mods.
 | Option | Type | Description
 
 | voxelsPerIngot
-| `int` in `[1..255]`
+| `int`
 | The number of voxels a single ingot should be worth.
 
+Valid value range: `[1..255]`
+
 | voxelsPerPlate
-| `int` in `[1..255]`
+| `int`
 | The number of voxels a single metal plate should be worth.
 
+Valid value range: `[1..255]`
+
 | materialUnitsPerIngot
-| `int` in `[1..65535]`
+| `int`
 | The amount of material required to craft an ingot.
 
+Valid value range: `[1..65535]`
+
 | materialUnitsPerBit
-| `int` in `[1..255]`
+| `int`
 | The amount of material represented by a single metal bit.
+
+Valid value range: `[1..255]`
+
+| materialUnitsRecoveredModifier
+| `float`
+| Percentage multiplier used to modify the amount of scrap material returned on
+completion of a smithing work.
+
+The default value of `1.0` represents `100%`, a value of `0.75` would represent
+`75%`, `0.5` for `50%` and so on.
+
+Valid value range: `[0.0..1.0]` (max precision of ~4 digits)
 
 | disallowedRecipes
 | array of `string`

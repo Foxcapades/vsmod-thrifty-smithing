@@ -13,8 +13,6 @@ public class ThriftySmithing : ModSystem {
 
   private static ThriftySmithingConfig? loadedConfig;
 
-  private static ILogger? logger;
-
   #region Mod Internal
 
   internal const string WorkDataKey = "ef:ts:workData";
@@ -25,14 +23,10 @@ public class ThriftySmithing : ModSystem {
     loadedConfig ??
     throw new InvalidOperationException("attempted to get the ThriftySmithing mod configuration before it was loaded");
 
-  internal static ILogger Logger =>
-    logger ??
-    throw new InvalidOperationException("attempted to get the mod logger configuration before ThriftySmithing was started");
-
   #endregion Mod Internal
 
   public override void Start(ICoreAPI api) {
-    logger = Mod.Logger;
+    Logs.init(Mod.Logger);
 
     registerTypes();
     loadConfig(api);
@@ -48,23 +42,23 @@ public class ThriftySmithing : ModSystem {
       var configJSON = api.LoadModConfig(ConfigFileName);
 
       if (configJSON == null) {
-        Logger.Notification("no config file found, one will be generated");
+        Logs.info("no config file found, one will be generated");
         loadedConfig = ThriftySmithingConfig.defaultConfig();
         writeConfig = true;
       } else {
-        Logger.Debug("loaded mod configuration");
+        Logs.debug("loaded mod configuration");
         (loadedConfig, writeConfig) = ThriftySmithingConfig.parseFromJSON(configJSON);
       }
     } catch (Exception e) {
-      Logger.Error("failed to load config JSON: {0}", e.Message);
+      Logs.error("failed to load config JSON: {0}", e.Message);
       loadedConfig = ThriftySmithingConfig.defaultConfig();
       writeConfig = true;
     }
 
     if (writeConfig) {
       try {
-        Logger.Notification("writing configuration to file: {0}", ConfigFileName);
-        api.StoreModConfig(loadedConfig.Value.toJSON(), ConfigFileName);
+        Logs.info("writing configuration to file: {0}", ConfigFileName);
+        api.StoreModConfig(loadedConfig.toJSON(), ConfigFileName);
       } catch (Exception e) {
         Console.WriteLine(e);
         throw;

@@ -21,9 +21,6 @@ namespace ThriftySmithing.Hax;
 [SuppressMessage("ReSharper", "UnusedType.Global")]
 internal class BlockEntityAnvilHax {
 
-
-  private static ILogger logger => ThriftySmithing.Logger;
-
   /**
    * <summary>
    * Before a voxel is split from a smithing recipe, if it is metal, add it to

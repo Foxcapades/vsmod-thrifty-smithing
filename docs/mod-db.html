@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>Thrifty Smithing</title>
@@ -24,55 +25,73 @@
     base VintageStory experience.  Most of these should not be changed unless
     necessitated by changes from other mods.
   </p>
-  <pre class="language-javascript"><code>{
-  "voxelsPerIngot": 42,
-  "voxelsPerPlate": 81,
-  "materialUnitsPerIngot": 100,
-  "materialUnitsPerBit": 5,
-  "disallowedRecipes": []
+  <pre><code data-lang="json">{
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>voxelsPerIngot</span><span style="color:#404">&quot;</span></span>: <span style="color:#00D">42</span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>voxelsPerPlate</span><span style="color:#404">&quot;</span></span>: <span style="color:#00D">81</span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>materialUnitsPerIngot</span><span style="color:#404">&quot;</span></span>: <span style="color:#00D">100</span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>materialUnitsPerBit</span><span style="color:#404">&quot;</span></span>: <span style="color:#00D">5</span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>materialUnitsRecoveredModifier</span><span style="color:#404">&quot;</span></span>: <span style="color:#60E">1.0</span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>disallowedRecipes</span><span style="color:#404">&quot;</span></span>: []
 }</code></pre>
-  <table style="border-spacing: 5px;">
+  <table>
     <thead>
       <tr>
-        <th>Option</th>
-        <th>Type</th>
-        <th>Description</th>
+        <th style="border-right: 1px black solid; padding: 5px;">Option</th>
+        <th style="border-right: 1px black solid; padding: 5px;">Type</th>
+        <th style="padding: 5px;">Description</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td><code>voxelsPerIngot</code></td>
-        <td><code>int</code> in <code>[1..255]</code></td>
-        <td>The number of voxels a single ingot should be worth.</td>
+        <td style="border-right: 1px black solid;padding: 5px;"><p><code>voxelsPerIngot</code></p></td>
+        <td style="border-right: 1px black solid;padding: 5px;"><p><code>int</code></p></td>
+        <td style="padding: 5px;">
+          <p>The number of voxels a single ingot should be worth.</p>
+          <p>Valid value range: <code>[1..255]</code></p>
+        </td>
       </tr>
       <tr>
-        <td><code>voxelsPerPlate</code></td>
-        <td><code>int</code> in <code>[1..255]</code></td>
-        <td>The number of voxels a single metal plate should be worth.</td>
+        <td style="border-right: 1px black solid;padding: 5px;"><p><code>voxelsPerPlate</code></p></td>
+        <td style="border-right: 1px black solid;padding: 5px;"><p><code>int</code></p></td>
+        <td style="padding: 5px;">
+          <p>The number of voxels a single metal plate should be worth.</p>
+          <p>Valid value range: <code>[1..255]</code></p>
+        </td>
       </tr>
       <tr>
-        <td><code>materialUnitsPerIngot</code></td>
-        <td><code>int</code> in <code>[1..65535]</code></td>
-        <td>The amount of material required to craft an ingot.</td>
+        <td style="border-right: 1px black solid;padding: 5px;"><p><code>materialUnitsPerIngot</code></p></td>
+        <td style="border-right: 1px black solid;padding: 5px;"><p><code>int</code></p></td>
+        <td style="padding: 5px;">
+          <p>The amount of material required to craft an ingot.</p>
+          <p>Valid value range: <code>[1..65535]</code></p>
+        </td>
       </tr>
       <tr>
-        <td><code>materialUnitsPerBit</code></td>
-        <td><code>int</code> in <code>[1..255]</code></td>
-        <td>The amount of material represented by a single metal bit.</td>
+        <td style="border-right: 1px black solid;padding: 5px;"><p><code>materialUnitsPerBit</code></p></td>
+        <td style="border-right: 1px black solid;padding: 5px;"><p><code>int</code></p></td>
+        <td style="padding: 5px;">
+          <p>The amount of material represented by a single metal bit.</p>
+          <p>Valid value range: <code>[1..255]</code></p>
+        </td>
       </tr>
       <tr>
-        <td><code>disallowedRecipes</code></td>
-        <td>array of <code>string</code></td>
-        <td>
-          <p>
-            Asset locations for recipes that should not reward any scrap on
-            completion.
-          </p>
-          <p>
-            For example setting this to <code>["game:knifeblade-copper"]</code>
-            would mean that players are not given any scrap metal back when
-            crafting a copper knife blade.
-          </p>
+        <td style="border-right: 1px black solid;padding: 5px;"><p><code>materialUnitsRecoveredModifier</code></p></td>
+        <td style="border-right: 1px black solid;padding: 5px;"><p><code>float</code></p></td>
+        <td style="padding: 5px;">
+          <p>Percentage multiplier used to modify the amount of scrap material returned on
+            completion of a smithing work.</p>
+          <p>The default value of <code>1.0</code> represents <code>100%</code>, a value of <code>0.75</code> would represent
+            <code>75%</code>, <code>0.5</code> for <code>50%</code> and so on.</p>
+          <p>Valid value range: <code>[0.0..1.0]</code> (max precision of ~4 digits)</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-right: 1px black solid;padding: 5px;"><p><code>disallowedRecipes</code></p></td>
+        <td style="border-right: 1px black solid;padding: 5px;"><p>array of <code>string</code></p></td>
+        <td style="padding: 5px;">
+          <p>Asset locations for recipes that should not reward any scrap on completion.</p>
+          <p>For example setting this to <code>["game:knifeblade-copper"]</code> would mean that players
+            are not given any scrap metal back when crafting a copper knife blade.</p>
         </td>
       </tr>
     </tbody>
@@ -87,7 +106,7 @@
     </li>
     <li>
       Thrifty Smithing <em>may</em> be compatible with mod-based metals, assuming
-      they provide metal bit items with asset locations matching the base game’s
+      they provide metal bit items with asset locations matching the base game&apos;s
       <code>metalbit-{material}</code> scheme.
     </li>
     <li>

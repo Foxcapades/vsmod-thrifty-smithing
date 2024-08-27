@@ -27,6 +27,8 @@ internal static class Smithy {
 
   public static int MaterialUnitsPerBit => ThriftySmithing.Config.materialUnitsPerBit;
 
+  public static float MaterialUnitsRecoveredModifier => (float) ThriftySmithing.Config.materialUnitsRecoveredModifier;
+
   internal static bool recipeIsAllowed(SmithingRecipe recipe) =>
     recipe.Output != null
     && !ThriftySmithing.Config.disallowedRecipes.Contains(recipe.Output.Code.ToString());
@@ -74,7 +76,7 @@ internal static class Smithy {
     calculateInputVoxels(data) - getVoxelCount(recipe);
 
   private static float calculateWasteMaterial(WorkData data, SmithingRecipe recipe) =>
-    calculateWasteVoxels(data, recipe) * MaterialUnitsPerVoxel;
+    calculateWasteVoxels(data, recipe) * MaterialUnitsPerVoxel * MaterialUnitsRecoveredModifier;
 
   private static float calculateTotalInputMaterial(WorkData data) =>
     data.ingotCount * MaterialUnitsPerIngot + data.plateCount * MaterialUnitsPerPlate;

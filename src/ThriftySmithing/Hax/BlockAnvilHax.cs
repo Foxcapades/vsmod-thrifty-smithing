@@ -12,8 +12,6 @@ namespace ThriftySmithing.Hax;
 [SuppressMessage("ReSharper", "UnusedType.Global")]
 internal class BlockAnvilHax {
 
-  private static ILogger logger => ThriftySmithing.Logger;
-
   [HarmonyPrefix]
   [SuppressMessage("ReSharper", "UnusedMember.Local")]
   private static void prefix(
@@ -29,7 +27,7 @@ internal class BlockAnvilHax {
 
     // If the entity is not an anvil entity??? then bail.
     if (world.BlockAccessor.GetBlockEntity(blockSel.Position) is not BlockEntityAnvil) {
-      logger.Debug("block wasn't an anvil entity?");
+      Logs.debug("block wasn't an anvil entity?");
       return;
     }
 
@@ -93,7 +91,7 @@ internal class BlockAnvilHax {
     //
     // TODO: Is it possible that a player can put down multiple items in a single shift-click?
     else if (!__state.code.Equals(stack?.Item?.Code)) {
-      logger.Debug("couldn't tell what was going on with that anvil interaction, ignoring it");
+      Logs.debug("couldn't tell what was going on with that anvil interaction, ignoring it");
       return;
     }
 
@@ -126,7 +124,7 @@ internal class BlockAnvilHax {
 
       case ItemType.Irrelevant:
       default:
-        logger.Warning("something fishy is afoot in the BlockAnvil.OnBlockInteractStart patch");
+        Logs.warn("something fishy is afoot in the BlockAnvil.OnBlockInteractStart patch");
         return;
     }
 

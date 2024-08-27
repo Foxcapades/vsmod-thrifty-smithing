@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using Vintagestory.API.Datastructures;
@@ -9,7 +10,7 @@ namespace ThriftySmithing.Utils;
  * ThriftySmithing mod configuration.
  * </summary>
  */
-internal readonly struct ThriftySmithingConfig {
+internal class ThriftySmithingConfig {
 
   #region Constants & Defaults
 
@@ -68,6 +69,20 @@ internal readonly struct ThriftySmithingConfig {
    */
   private const byte DefaultMaterialUnitsPerBit = 5;
   private const string ConfigKeyMaterialUnitsPerBit = "materialUnitsPerBit";
+
+  /**
+   * <summary>
+   * Defines the default or fallback value to use when configuring the modifier
+   * applied to the amount of material recovered from a smithing work.
+   * </summary>
+   *
+   * <remarks>
+   * This value is a percentage and is multiplied directly to the calculated
+   * material recovered on a completed work.
+   * </remarks>
+   */
+  private const float DefaultMaterialUnitsRecoveredModifier = 1.0f;
+  private const string ConfigKeyMaterialUnitsRecoveredModifier = "materialUnitsRecoveredModifier";
 
   /**
    * <summary>
@@ -169,6 +184,8 @@ internal readonly struct ThriftySmithingConfig {
    */
   public readonly byte materialUnitsPerBit;
 
+  public readonly Half materialUnitsRecoveredModifier;
+
   /**
    * <summary>
    * Recipes (item locations) for which ThriftySmithing mod behaviors are
@@ -184,12 +201,14 @@ internal readonly struct ThriftySmithingConfig {
     byte voxelsPerPlate,
     ushort materialUnitsPerIngot,
     byte materialUnitsPerBit,
+    Half materialUnitsRecoveredModifier,
     IReadOnlySet<string> disallowedRecipes
   ) {
     this.voxelsPerIngot = voxelsPerIngot;
     this.voxelsPerPlate = voxelsPerPlate;
     this.materialUnitsPerIngot = materialUnitsPerIngot;
     this.materialUnitsPerBit = materialUnitsPerBit;
+    this.materialUnitsRecoveredModifier = materialUnitsRecoveredModifier;
     this.disallowedRecipes = disallowedRecipes;
   }
 
@@ -202,6 +221,7 @@ internal readonly struct ThriftySmithingConfig {
     json[ConfigKeyVoxelsPerPlate] = voxelsPerPlate;
     json[ConfigKeyMaterialUnitsPerIngot] = materialUnitsPerIngot;
     json[ConfigKeyMaterialUnitsPerBit] = materialUnitsPerBit;
+    json[ConfigKeyMaterialUnitsRecoveredModifier] = (float) materialUnitsRecoveredModifier;
     json[ConfigKeyDisallowedRecipes] = new JArray(disallowedRecipes);
 
     return new(json);
@@ -234,33 +254,44 @@ internal readonly struct ThriftySmithingConfig {
    * boolean value indicating whether the input JSON was valid.
    * </returns>
    */
-  internal static (ThriftySmithingConfig config, bool wasValid) parseFromJSON(JsonObject json) {
+  internal static (ThriftySmithingConfig config, bool writeConfig) parseFromJSON(JsonObject json) {
     if (json.Token.Type != JTokenType.Object) {
-      ThriftySmithing.Logger.Warning("configuration JSON was not an object; using default config");
+      Logs.warn("configuration JSON was not an object; using default config");
       return (defaultConfig(), false);
     }
 
-    bool wasValid = true, twv;
+    bool wasValid = true, tempWasValid;
     byte vpi, vpp, mupb;
     ushort mupi;
+    Half murm;
     IReadOnlySet<string> dr;
 
-    (vpi, twv) = parseByte(json.Token, ConfigKeyVoxelsPerIngot, DefaultVoxelsPerIngot);
-    wasValid = wasValid && twv;
+    (vpi, tempWasValid) = parseByte(json.Token, ConfigKeyVoxelsPerIngot, DefaultVoxelsPerIngot);
+    wasValid = wasValid && tempWasValid;
 
-    (vpp, twv) = parseByte(json.Token, ConfigKeyVoxelsPerPlate, DefaultVoxelsPerPlate);
-    wasValid = wasValid && twv;
+    (vpp, tempWasValid) = parseByte(json.Token, ConfigKeyVoxelsPerPlate, DefaultVoxelsPerPlate);
+    wasValid = wasValid && tempWasValid;
 
-    (mupi, twv) = parseUShort(json.Token, ConfigKeyMaterialUnitsPerIngot, DefaultMaterialUnitsPerIngot);
-    wasValid = wasValid && twv;
+    (mupi, tempWasValid) = parseUShort(json.Token, ConfigKeyMaterialUnitsPerIngot, DefaultMaterialUnitsPerIngot);
+    wasValid = wasValid && tempWasValid;
 
-    (mupb, twv) = parseByte(json.Token, ConfigKeyMaterialUnitsPerBit, DefaultMaterialUnitsPerBit);
-    wasValid = wasValid && twv;
+    (mupb, tempWasValid) = parseByte(json.Token, ConfigKeyMaterialUnitsPerBit, DefaultMaterialUnitsPerBit);
+    wasValid = wasValid && tempWasValid;
 
-    (dr, twv) = parseDisallowedRecipes(json.Token);
-    wasValid = wasValid && twv;
+    (murm, tempWasValid) = Cereal.JSON.tryParseHalf(json.Token, ConfigKeyMaterialUnitsRecoveredModifier, (Half) DefaultMaterialUnitsRecoveredModifier);
+    if (!tempWasValid)
+      Logs.warn("config value \"" + ConfigKeyMaterialUnitsRecoveredModifier + "\" was invalid or absent; using default value");
+    if (murm < Half.Zero || murm > Half.One) {
+      Logs.warn("config value \"" + ConfigKeyMaterialUnitsRecoveredModifier + "\" was outside the valid range; using default value");
+      murm = (Half) DefaultMaterialUnitsRecoveredModifier;
+      tempWasValid = false;
+    }
+    wasValid = wasValid && tempWasValid;
 
-    return (new ThriftySmithingConfig(vpi, vpp, mupi, mupb, dr), wasValid);
+    (dr, tempWasValid) = parseDisallowedRecipes(json.Token);
+    wasValid = wasValid && tempWasValid;
+
+    return (new ThriftySmithingConfig(vpi, vpp, mupi, mupb, murm, dr), !wasValid);
   }
 
   /**
@@ -279,6 +310,7 @@ internal readonly struct ThriftySmithingConfig {
       DefaultVoxelsPerPlate,
       DefaultMaterialUnitsPerIngot,
       DefaultMaterialUnitsPerBit,
+      (Half) DefaultMaterialUnitsRecoveredModifier,
       defaultDisallowedRecipes()
     );
 
@@ -290,7 +322,7 @@ internal readonly struct ThriftySmithingConfig {
     var (parsedValue, usedDefault) = tryInt(json, key, fallback);
 
     if (!usedDefault && parsedValue is < 1 or > 255) {
-      ThriftySmithing.Logger.Warning(
+      Logs.warn(
         "configuration JSON had an invalid value for key \"{0}\", must be in "
         + "the range [0, 255]; using default value \"{1}\"",
         key,
@@ -307,7 +339,7 @@ internal readonly struct ThriftySmithingConfig {
     var (parsedValue, usedDefault) = tryInt(json, key, fallback);
 
     if (!usedDefault && parsedValue is < 1 or > 65535) {
-      ThriftySmithing.Logger.Warning(
+      Logs.warn(
         "configuration JSON had an invalid value for key \"{0}\", must be in "
         + "the range [1, 65535]; using default value \"{1}\"",
         key,
@@ -322,14 +354,14 @@ internal readonly struct ThriftySmithingConfig {
 
   private static (IReadOnlySet<string>, bool wasValid) parseDisallowedRecipes(JToken json) {
     if (json[ConfigKeyDisallowedRecipes] == null) {
-      ThriftySmithing.Logger.Notification(@"configuration JSON had no value ""{0}"", using default value", ConfigKeyDisallowedRecipes);
+      Logs.info("configuration JSON had no value \"{0}\", using default value", ConfigKeyDisallowedRecipes);
       return (defaultDisallowedRecipes(), false);
     }
 
     var recipeArray = json[ConfigKeyDisallowedRecipes]!;
 
     if (recipeArray.Type != JTokenType.Array) {
-      ThriftySmithing.Logger.Warning(@"configuration JSON ""{0}"" value was set to a non-array value, using default value", ConfigKeyDisallowedRecipes);
+      Logs.warn("configuration JSON \"{0}\" value was set to a non-array value, using default value", ConfigKeyDisallowedRecipes);
       return (defaultDisallowedRecipes(), false);
     }
 
@@ -338,7 +370,7 @@ internal readonly struct ThriftySmithingConfig {
 
     foreach (var token in (JArray) recipeArray) {
       if (token.Type != JTokenType.String) {
-        ThriftySmithing.Logger.Warning(@"configuration JSON ""{0}"" array contained a non-string value, ignoring that value", ConfigKeyDisallowedRecipes);
+        Logs.warn("configuration JSON \"{0}\" array contained a non-string value, ignoring that value", ConfigKeyDisallowedRecipes);
         wasValid = false;
         continue;
       }
@@ -377,7 +409,7 @@ internal readonly struct ThriftySmithingConfig {
    */
   private static (int value, bool usedDefault) tryInt(JToken json, string key, int defaultValue) {
     if (json[key] == null) {
-      ThriftySmithing.Logger.Notification(@"configuration JSON had no value for key ""{0}"", using default value ""{1}""", key, defaultValue);
+      Logs.info("configuration JSON had no value for key \"{0}\", using default value \"{1}\"", key, defaultValue);
       return (defaultValue, true);
     }
 
@@ -391,12 +423,12 @@ internal readonly struct ThriftySmithingConfig {
       case JTokenType.Float: {
         var floatVal = value.Value<float>();
         var intVal = (int) floatVal;
-        ThriftySmithing.Logger.Warning(@"configuration JSON ""{0}"" value was set to the float value ""{1}"" instead of an int; trimming value to ""{2}""", key, floatVal, intVal);
+        Logs.warn("configuration JSON \"{0}\" value was set to the float value \"{1}\" instead of an int; trimming value to \"{2}\"", key, floatVal, intVal);
         return (intVal, true);
       }
 
       default:
-        ThriftySmithing.Logger.Warning(@"configuration JSON ""{0}"" value was set to a non-integer value, falling back to default value ""{1}""", key, defaultValue);
+        Logs.warn("configuration JSON \"{0}\" value was set to a non-integer value, falling back to default value \"{1}\"", key, defaultValue);
         return (defaultValue, true);
     }
   }
