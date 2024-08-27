@@ -1,4 +1,4 @@
-ASSEMBLY_NAME := $(shell cat build.csproj | tr -d '[:space:]' | sed 's/.*AssemblyName>\([^<]\+\).*/\1/')
+ASSEMBLY_NAME := $(shell cat ThriftySmithing.csproj | tr -d '[:space:]' | sed 's/.*AssemblyName>\([^<]\+\).*/\1/')
 MOD_VERSION   := $(shell (git describe --tags 2> /dev/null || echo 'v0.0.0') | cut -c2-)
 MOD_ID        := $(shell echo "$(ASSEMBLY_NAME)" | tr '[:upper:]' '[:lower:]')
 
@@ -74,7 +74,7 @@ $(DEBUG_ZIP_TARGET): $(DEBUG_OUTPUT_FILES) $(INCLUDED_FILES)
 
 $(DEBUG_OUTPUT_FILES): $(CSHARP_FILES)
 	@rm -rf $(DEBUG_OUT_DIR) $(INTER_ROOT)
-	@dotnet build build.csproj /p:Configuration=$(PROFILE_DEBUG)
+	@dotnet build ThriftySmithing.csproj /p:Configuration=$(PROFILE_DEBUG)
 
 #
 # Release Builds

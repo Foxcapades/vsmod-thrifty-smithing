@@ -3,8 +3,11 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Vintagestory.API.Common;
 
-namespace thrifty.debug;
+namespace ThriftySmithing.Utils;
 
+/// <summary>
+/// Logging facade.
+/// </summary>
 internal static class Logs {
   private static ILogger? logger;
 
