@@ -281,6 +281,10 @@ internal class ThriftySmithingConfig {
     (murm, tempWasValid) = Cereal.JSON.tryParseHalf(json.Token, ConfigKeyMaterialUnitsRecoveredModifier, (Half) DefaultMaterialUnitsRecoveredModifier);
     if (!tempWasValid)
       Logs.warn("config value \"" + ConfigKeyMaterialUnitsRecoveredModifier + "\" was invalid or absent; using default value");
+    if (murm < Half.Zero || murm > Half.One) {
+      Logs.warn("config value \"" + ConfigKeyMaterialUnitsRecoveredModifier + "\" was outside the valid range; using default value");
+      murm = (Half) DefaultMaterialUnitsRecoveredModifier;
+    }
     wasValid = wasValid && tempWasValid;
 
     (dr, tempWasValid) = parseDisallowedRecipes(json.Token);
