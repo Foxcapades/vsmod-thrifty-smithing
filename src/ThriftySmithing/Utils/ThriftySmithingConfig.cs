@@ -284,6 +284,7 @@ internal class ThriftySmithingConfig {
     if (murm < Half.Zero || murm > Half.One) {
       Logs.warn("config value \"" + ConfigKeyMaterialUnitsRecoveredModifier + "\" was outside the valid range; using default value");
       murm = (Half) DefaultMaterialUnitsRecoveredModifier;
+      tempWasValid = false;
     }
     wasValid = wasValid && tempWasValid;
 
