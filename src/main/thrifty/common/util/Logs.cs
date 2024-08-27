@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Vintagestory.API.Common;
 
-namespace ThriftySmithing.Utils;
+namespace thrifty.common.util;
 
 /// <summary>
 /// Logging facade.

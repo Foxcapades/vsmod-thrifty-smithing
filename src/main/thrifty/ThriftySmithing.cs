@@ -6,7 +6,7 @@ using ThriftySmithing.Utils;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
 
-namespace ThriftySmithing;
+namespace thrifty;
 
 public class ThriftySmithing : ModSystem {
   private const string ConfigFileName = "thrifty-smithing.json";
