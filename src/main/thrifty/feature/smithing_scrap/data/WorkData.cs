@@ -2,9 +2,11 @@ using System.IO;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
 
-namespace ThriftySmithing.Data;
+namespace thrifty.feature.smithing_scrap.data;
 
 internal struct WorkData : IAttribute {
+  internal const string AttributeKey = "ef.ts.workData";
+
   internal byte ingotCount = 0;
 
   internal byte plateCount = 0;
@@ -28,7 +30,7 @@ internal struct WorkData : IAttribute {
     plateCount = stream.ReadByte();
   }
 
-  public int GetAttributeId() => ThriftySmithing.InternalAttributeID;
+  public int GetAttributeId() => SmithingScrapFeature.attributeID;
 
   public object GetValue() => this;
 

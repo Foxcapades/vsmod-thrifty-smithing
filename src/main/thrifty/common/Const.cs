@@ -1,4 +1,4 @@
-namespace ThriftySmithing.Data;
+namespace thrifty.common;
 
 internal static class Const {
   internal const string DefaultMetalBitPathPrefix = "metalbit";

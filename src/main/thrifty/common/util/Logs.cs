@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Vintagestory.API.Common;
 
-namespace ThriftySmithing.Utils;
+namespace thrifty.common.util;
 
 /// <summary>
 /// Logging facade.
@@ -19,6 +19,18 @@ internal static class Logs {
     Logs.logger = logger;
   }
 
+  /// <summary>
+  /// Log a message at trace (verbose debug) level.
+  /// </summary>
+  ///
+  /// <remarks>
+  /// In production builds this method should be empty and hopefully inlined
+  /// away entirely.
+  /// </remarks>
+  ///
+  /// <param name="message">
+  /// Message to log.
+  /// </param>
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   internal static void trace(string message) {
     #if ENABLE_DEBUG_FEATURES
@@ -27,6 +39,23 @@ internal static class Logs {
     #endif
   }
 
+  /// <summary>
+  /// Log a message at trace (verbose debug) level.
+  /// </summary>
+  ///
+  /// <remarks>
+  /// In production builds this method should be empty and hopefully inlined
+  /// away entirely.
+  /// </remarks>
+  ///
+  /// <param name="format">
+  /// String format for the message.  This format should follow the rules of the
+  /// standard library <c>string.Format</c> method.
+  /// </param>
+  ///
+  /// <param name="p1">
+  /// Object to inject into the format string for logging.
+  /// </param>
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   internal static void trace(string format, object p1) {
     #if ENABLE_DEBUG_FEATURES
@@ -35,6 +64,27 @@ internal static class Logs {
     #endif
   }
 
+  /// <summary>
+  /// Log a message at trace (verbose debug) level.
+  /// </summary>
+  ///
+  /// <remarks>
+  /// In production builds this method should be empty and hopefully inlined
+  /// away entirely.
+  /// </remarks>
+  ///
+  /// <param name="format">
+  /// String format for the message.  This format should follow the rules of the
+  /// standard library <c>string.Format</c> method.
+  /// </param>
+  ///
+  /// <param name="p1">
+  /// First object to inject into the format string for logging.
+  /// </param>
+  ///
+  /// <param name="p2">
+  /// Second object to inject into the format string for logging.
+  /// </param>
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   internal static void trace(string format, object p1, object p2) {
     #if ENABLE_DEBUG_FEATURES

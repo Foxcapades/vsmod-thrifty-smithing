@@ -1,14 +1,15 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using HarmonyLib;
-using ThriftySmithing.Data;
-using ThriftySmithing.Extensions;
-using ThriftySmithing.Utils;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
-namespace ThriftySmithing.Hax;
+using thrifty.common.util;
+using thrifty.feature.smithing_scrap.data;
+using thrifty.feature.smithing_scrap.ext;
+
+namespace thrifty.feature.smithing_scrap.hax;
 
 /**
  * <summary>
@@ -17,9 +18,25 @@ namespace ThriftySmithing.Hax;
  * or aborted.
  * </summary>
  */
-[HarmonyPatch(typeof(BlockEntityAnvil))]
-[SuppressMessage("ReSharper", "UnusedType.Global")]
 internal class BlockEntityAnvilHax {
+  private static MethodInfo? onSplit, checkIfFinished;
+
+  internal static void patch(Harmony harmony) {
+    var type = typeof(BlockEntityAnvil);
+
+    onSplit = harmony.Patch(type.GetMethod(nameof(BlockEntityAnvil.OnSplit)), new(onSplitPrefix), new(onSplitPostfix));
+    checkIfFinished = harmony.Patch(type.GetMethod(nameof(BlockEntityAnvil.CheckIfFinished)), new(checkIfFinishedPrefix));
+  }
+
+  internal static void unpatch(Harmony harmony) {
+    var type = typeof(BlockEntityAnvil);
+
+    harmony.Unpatch(type.GetMethod(nameof(BlockEntityAnvil.OnSplit)), onSplit);
+    onSplit = null;
+
+    harmony.Unpatch(type.GetMethod(nameof(BlockEntityAnvil.CheckIfFinished)), checkIfFinished);
+    checkIfFinished = null;
+  }
 
   /**
    * <summary>
@@ -35,18 +52,10 @@ internal class BlockEntityAnvilHax {
    * Entity instance the patched method is being called on, provided by Harmony.
    * </param>
    */
-  [HarmonyPrefix]
-  [HarmonyPatch(nameof(BlockEntityAnvil.OnSplit))]
-  [SuppressMessage("ReSharper", "UnusedMember.Local")]
   private static void onSplitPrefix(Vec3i voxelPos, BlockEntityAnvil __instance) {
-    // 1. Only operate on the server side
-    // 2. Only operate if the target voxel is metal
-    // 3. Only operate if the recipe was not disallowed in the config
-    if (
-      __instance.Api.World.Side.IsServer()
-      && isMetalVoxel(voxelPos, __instance)
-      && Smithy.recipeIsAllowed(__instance.SelectedRecipe)
-    ) {
+    // . Only operate if the target voxel is metal
+    // . Only operate if the recipe was not disallowed in the config
+    if (isMetalVoxel(voxelPos, __instance) && Smithy.recipeIsAllowed(__instance.SelectedRecipe)) {
       var workData = __instance.getWorkData() ?? new();
       __instance.setWorkData(workData);
     }
@@ -64,18 +73,10 @@ internal class BlockEntityAnvilHax {
    * Entity instance the patched method is being called on, provided by Harmony.
    * </param>
    */
-  [HarmonyPostfix]
-  [HarmonyPatch(nameof(BlockEntityAnvil.OnSplit))]
-  [SuppressMessage("ReSharper", "UnusedMember.Local")]
   private static void onSplitPostfix(BlockEntityAnvil __instance) {
-    // 1. Only operate on the server side
-    // 2. Only operate for allowed recipes
-    // 3. Only operate if there are no voxels left
-    if (
-      __instance.Api.World.Side.IsServer()
-      && Smithy.recipeIsAllowed(__instance.SelectedRecipe)
-      && !hasRemainingVoxels(__instance)
-    ) {
+    // . Only operate for allowed recipes
+    // . Only operate if there are no voxels left
+    if (Smithy.recipeIsAllowed(__instance.SelectedRecipe) && !hasRemainingVoxels(__instance)) {
       // If all the voxels were split off of the work item, then the recipe has
       // been aborted.  Spit out bits equivalent to the input materials used for
       // the recipe.
@@ -105,10 +106,6 @@ internal class BlockEntityAnvilHax {
    * Entity instance the patched method is being called on, provided by Harmony.
    * </param>
    */
-  [HarmonyPrefix]
-  [HarmonyPatch(nameof(BlockEntityAnvil.CheckIfFinished))]
-  [SuppressMessage("ReSharper", "UnusedMember.Local")]
-  // TODO: byPlayer can be null!!!
   private static void checkIfFinishedPrefix(IPlayer? byPlayer, BlockEntityAnvil __instance) {
     // 1. Only run on the server side
     // 2. Only run if there is a recipe

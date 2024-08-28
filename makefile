@@ -1,8 +1,10 @@
-ASSEMBLY_NAME := $(shell cat ThriftySmithing.csproj | tr -d '[:space:]' | sed 's/.*AssemblyName>\([^<]\+\).*/\1/')
+MAIN_PROJ_DIR := ${PWD}/src/main
+
+ASSEMBLY_NAME := $(shell cat $(MAIN_PROJ_DIR)/main.csproj | tr -d '[:space:]' | sed 's/.*AssemblyName>\([^<]\+\).*/\1/')
 MOD_VERSION   := $(shell (git describe --tags 2> /dev/null || echo 'v0.0.0') | cut -c2-)
 MOD_ID        := $(shell echo "$(ASSEMBLY_NAME)" | tr '[:upper:]' '[:lower:]')
 
-BUILD_ROOT   := ${PWD}/$(shell cat Directory.Build.props | tr -d '[:space:]' | sed 's/.*BuildRoot>\([^<]\+\).*/\1/')
+BUILD_ROOT   := ${PWD}/$(shell cat Directory.Build.props | tr -d '[:space:]' | sed 's/.*BuildRoot>\([^<]\+\).*/\1/' | xargs basename)
 INTER_ROOT   := $(BUILD_ROOT)/obj
 OUTPUT_ROOT  := $(BUILD_ROOT)/out
 STAGING_ROOT := $(BUILD_ROOT)/staging
@@ -74,7 +76,7 @@ $(DEBUG_ZIP_TARGET): $(DEBUG_OUTPUT_FILES) $(INCLUDED_FILES)
 
 $(DEBUG_OUTPUT_FILES): $(CSHARP_FILES)
 	@rm -rf $(DEBUG_OUT_DIR) $(INTER_ROOT)
-	@dotnet build ThriftySmithing.csproj /p:Configuration=$(PROFILE_DEBUG)
+	@dotnet build /p:Configuration=$(PROFILE_DEBUG)
 
 #
 # Release Builds
@@ -99,7 +101,7 @@ $(RELEASE_ZIP_TARGET): $(RELEASE_OUTPUT_FILES) $(INCLUDED_FILES)
 
 $(RELEASE_OUTPUT_FILES): $(CSHARP_FILES)
 	@rm -rf $(RELEASE_OUT_DIR) $(INTER_ROOT)
-	@dotnet build ThriftySmithing.csproj /p:Configuration=$(PROFILE_RELEASE)
+	@dotnet build /p:Configuration=$(PROFILE_RELEASE)
 
 #
 #  Utility Targets

@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Reflection;
 using HarmonyLib;
-using ThriftySmithing.Data;
-using ThriftySmithing.Utils;
 using Vintagestory.API.Common;
-using Vintagestory.API.Datastructures;
 
-namespace ThriftySmithing;
+using thrifty.common.config;
+using thrifty.common.util;
+using thrifty.feature.smithing_scrap;
+
+namespace thrifty;
 
 public class ThriftySmithing : ModSystem {
   private const string ConfigFileName = "thrifty-smithing.json";
@@ -14,10 +14,6 @@ public class ThriftySmithing : ModSystem {
   private static ThriftySmithingConfig? loadedConfig;
 
   #region Mod Internal
-
-  internal const string WorkDataKey = "ef:ts:workData";
-
-  internal static readonly byte InternalAttributeID = (byte) (TreeAttribute.AttributeIdMapping.Count + 1);
 
   internal static ThriftySmithingConfig Config =>
     loadedConfig ??
@@ -28,9 +24,8 @@ public class ThriftySmithing : ModSystem {
   public override void Start(ICoreAPI api) {
     Logs.init(Mod.Logger);
 
-    registerTypes();
     loadConfig(api);
-    applyHarmonyPatches(Mod.Info.ModID);
+    applyHarmonyPatches(Mod.Info.ModID, api);
 
     base.Start(api);
   }
@@ -66,12 +61,11 @@ public class ThriftySmithing : ModSystem {
     }
   }
 
-  private static void registerTypes() {
-    TreeAttribute.RegisterAttribute(InternalAttributeID, typeof(WorkData));
-  }
+  private static void applyHarmonyPatches(string id, ICoreAPI api) {
+    if (!Harmony.HasAnyPatches(id)) {
+      var harmony = new Harmony(id);
 
-  private static void applyHarmonyPatches(string id) {
-    if (!Harmony.HasAnyPatches(id))
-      new Harmony(id).PatchAll(Assembly.GetExecutingAssembly());
+      SmithingScrapFeature.register(harmony, api);
+    }
   }
 }

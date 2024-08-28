@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using Vintagestory.API.Common;
 using Vintagestory.GameContent;
 
-namespace ThriftySmithing.Data;
+namespace thrifty.feature.smithing_scrap.data;
 
 /**
  * <summary>
