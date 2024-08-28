@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <BuildRoot>build</BuildRoot>
+    <BuildRoot>$(MSBuildThisFileDirectory)/build</BuildRoot>
     <BaseIntermediateOutputPath>$(BuildRoot)/obj</BaseIntermediateOutputPath>
     <OutputPath>$(BuildRoot)/out/$(Configuration)</OutputPath>
   </PropertyGroup>

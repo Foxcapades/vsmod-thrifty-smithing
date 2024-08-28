@@ -7,4 +7,4 @@ vendor/
 src/SharpYaml/
 
 .envrc
-Folder.DotSettings.user
+*.DotSettings.user

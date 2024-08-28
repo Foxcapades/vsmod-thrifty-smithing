@@ -1,19 +1,30 @@
-using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using HarmonyLib;
-using ThriftySmithing.Data;
-using ThriftySmithing.Extensions;
-using ThriftySmithing.Utils;
 using Vintagestory.API.Common;
 using Vintagestory.GameContent;
 
-namespace ThriftySmithing.Hax;
+using thrifty.common;
+using thrifty.common.util;
+using thrifty.feature.smithing_scrap.ext;
 
-[HarmonyPatch(typeof(BlockAnvil), nameof(BlockAnvil.OnBlockInteractStart))]
-[SuppressMessage("ReSharper", "UnusedType.Global")]
+namespace thrifty.feature.smithing_scrap.hax;
+
 internal class BlockAnvilHax {
+  private static MethodInfo? onBlockInteractStart;
 
-  [HarmonyPrefix]
-  [SuppressMessage("ReSharper", "UnusedMember.Local")]
+  internal static void patch(Harmony harmony) {
+    onBlockInteractStart = harmony.Patch(
+      typeof(BlockAnvil).GetMethod(nameof(BlockAnvil.OnBlockInteractStart)),
+      new(prefix),
+      new(postfix)
+    );
+  }
+
+  internal static void unpatch(Harmony harmony) {
+    harmony.Unpatch(typeof(BlockAnvil).GetMethod(nameof(BlockAnvil.OnBlockInteractStart)), onBlockInteractStart);
+    onBlockInteractStart = null;
+  }
+
   private static void prefix(
     IWorldAccessor world,
     IPlayer byPlayer,
@@ -57,8 +68,6 @@ internal class BlockAnvilHax {
     );
   }
 
-  [HarmonyPostfix]
-  [SuppressMessage("ReSharper", "UnusedMember.Local")]
   private static void postfix(
     IWorldAccessor world,
     IPlayer byPlayer,

@@ -1,10 +1,9 @@
-using ThriftySmithing.Data;
 using Vintagestory.API.Common;
 using Vintagestory.GameContent;
 
-namespace ThriftySmithing.Utils;
+namespace thrifty.common.util;
 
-public static class BitGen {
+internal static class BitGen {
 
   internal static void issueBits(int count, BlockEntityAnvil anvil) {
     if (count < 1)
@@ -35,6 +34,6 @@ public static class BitGen {
 
   private static AssetLocation getBitCode(BlockEntityAnvil anvil) {
     var input = anvil.SelectedRecipe.Ingredient.Code!;
-    return new(input.Domain, Paths.makePathOf(Const.DefaultMetalBitPathPrefix, Paths.lastPathEntry(input)));
+    return new(input.Domain, Paths.makePathOf(Const.DefaultMetalBitPathPrefix, input.lastPathEntry()));
   }
 }

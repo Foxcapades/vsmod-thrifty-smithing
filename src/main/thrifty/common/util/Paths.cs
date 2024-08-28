@@ -3,7 +3,7 @@ using Vintagestory.API.Common;
 namespace thrifty.common.util;
 
 internal static class Paths {
-  internal static string lastPathEntry(AssetLocation location) =>
+  internal static string lastPathEntry(this AssetLocation location) =>
     location.Path.Substring(location.Path.LastIndexOf('-') + 1);
 
   internal static string makePathOf(string prefix, string variant) =>

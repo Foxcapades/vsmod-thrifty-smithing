@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using Vintagestory.API.Datastructures;
 
-namespace ThriftySmithing.Utils;
+using thrifty.common.util;
+
+namespace thrifty.common.config;
 
 /**
  * <summary>
  * ThriftySmithing mod configuration.
  * </summary>
  */
+[Obsolete("to be replaced with feature-specific configuration")]
 internal class ThriftySmithingConfig {
 
   #region Constants & Defaults
