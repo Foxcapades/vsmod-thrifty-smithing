@@ -13,13 +13,9 @@ public class ThriftySmithing : ModSystem {
 
   private static ThriftySmithingConfig? loadedConfig;
 
-  #region Mod Internal
-
   internal static ThriftySmithingConfig Config =>
     loadedConfig ??
     throw new InvalidOperationException("attempted to get the ThriftySmithing mod configuration before it was loaded");
-
-  #endregion Mod Internal
 
   public override void Start(ICoreAPI api) {
     Logs.init(Mod.Logger);
