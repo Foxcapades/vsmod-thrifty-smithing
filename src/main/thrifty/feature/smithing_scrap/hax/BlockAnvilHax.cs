@@ -52,7 +52,7 @@ internal class BlockAnvilHax {
     var type = itemTypeOf(stack.Item!);
 
     // if the held item is not one we care about, then bail.
-    if (type == ItemType.Irrelevant)
+    if (type == IngredientType.Irrelevant)
       return;
 
     // If we got here, then we know the player shift-clicked an anvil entity
@@ -123,15 +123,15 @@ internal class BlockAnvilHax {
     // Increase the count of the relevant item type for whatever the player just
     // put on the anvil.
     switch (__state.type) {
-      case ItemType.Ingot:
+      case IngredientType.Ingot:
         workData.ingotCount += (byte) (__state.size - remainingItems);
         break;
 
-      case ItemType.Plate:
+      case IngredientType.Plate:
         workData.plateCount += (byte) (__state.size - remainingItems);
         break;
 
-      case ItemType.Irrelevant:
+      case IngredientType.Irrelevant:
       default:
         Logs.warn("something fishy is afoot in the BlockAnvil.OnBlockInteractStart patch");
         return;
@@ -141,22 +141,20 @@ internal class BlockAnvilHax {
     entity.setWorkData(workData);
   }
 
-  private static ItemType itemTypeOf(Item item) =>
+  private static IngredientType itemTypeOf(Item item) =>
     Paths.firstPathEntry(item.Code) switch {
-      Const.DefaultIngotPathPrefix => ItemType.Ingot,
-      Const.DefaultMetalPlatePathPrefix => ItemType.Plate,
-      _ => ItemType.Irrelevant,
+      Const.DefaultIngotPathPrefix => IngredientType.Ingot,
+      Const.DefaultMetalPlatePathPrefix => IngredientType.Plate,
+      _ => IngredientType.Irrelevant,
     };
 
-  private enum ItemType : byte { Ingot, Plate, Irrelevant }
-
   private record StackInfo {
-    internal readonly ItemType type;
+    internal readonly IngredientType type;
     internal readonly AssetLocation code;
     internal readonly int pos;
     internal readonly int size;
 
-    public StackInfo(ItemType type, AssetLocation code, int pos, int size) {
+    public StackInfo(IngredientType type, AssetLocation code, int pos, int size) {
       this.type = type;
       this.code = code;
       this.pos = pos;

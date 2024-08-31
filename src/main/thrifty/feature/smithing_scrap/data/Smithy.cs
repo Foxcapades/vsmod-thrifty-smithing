@@ -3,11 +3,9 @@ using Vintagestory.GameContent;
 
 namespace thrifty.feature.smithing_scrap.data;
 
-/**
- * <summary>
- * Data access facade and utility methods.
- * </summary>
- */
+/// <summary>
+/// Data access facade and utility methods.
+/// </summary>
 internal static class Smithy {
 
   #region Config-Based Values
@@ -65,6 +63,11 @@ internal static class Smithy {
   internal static int calculateWasteReturnBits(WorkData data, SmithingRecipe recipe) =>
     (int) (calculateWasteMaterial(data, recipe) / MaterialUnitsPerBit);
 
+  internal static (int bits, float lost) calculateWaste(int wasteVoxels) {
+    var wasteMaterial = calculateWasteMaterial(wasteVoxels);
+    return ((int) (wasteMaterial / MaterialUnitsPerBit), wasteMaterial % MaterialUnitsPerBit);
+  }
+
   internal static int calculateTotalInputBits(WorkData data) =>
     (int) (calculateTotalInputMaterial(data) / MaterialUnitsPerBit);
 
@@ -75,7 +78,10 @@ internal static class Smithy {
     calculateInputVoxels(data) - getVoxelCount(recipe);
 
   private static float calculateWasteMaterial(WorkData data, SmithingRecipe recipe) =>
-    calculateWasteVoxels(data, recipe) * MaterialUnitsPerVoxel * MaterialUnitsRecoveredModifier;
+    calculateWasteMaterial(calculateWasteVoxels(data, recipe));
+
+  internal static float calculateWasteMaterial(int wasteVoxels) =>
+    wasteVoxels * MaterialUnitsPerVoxel * MaterialUnitsRecoveredModifier;
 
   private static float calculateTotalInputMaterial(WorkData data) =>
     data.ingotCount * MaterialUnitsPerIngot + data.plateCount * MaterialUnitsPerPlate;

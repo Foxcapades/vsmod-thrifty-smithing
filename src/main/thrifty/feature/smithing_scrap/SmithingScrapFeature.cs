@@ -47,8 +47,9 @@ internal static class SmithingScrapFeature {
     // Only register the harmony patches on the server side.
     if (api is ICoreServerAPI) {
       BlockAnvilHax.patch(harmony);
-      BlockEntityAnvilHax.patch(harmony);
     }
+
+    BlockEntityAnvilHax.patch(harmony, api.Side);
 
     patched = true;
   }
@@ -58,9 +59,13 @@ internal static class SmithingScrapFeature {
   /// </summary>
   internal static void deregister(Harmony harmony, ICoreAPI api) {
     // Harmony patches should only be registered on the server side.
-    if (patched && api is ICoreServerAPI) {
-      BlockEntityAnvilHax.unpatch(harmony);
+    if (patched) {
+      if (api is ICoreServerAPI) {
+        BlockEntityAnvilHax.unpatch(harmony);
+      }
+
       BlockAnvilHax.unpatch(harmony);
+
       patched = false;
     }
   }
