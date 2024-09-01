@@ -3,6 +3,7 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
 using thrifty.common.ext;
+using thrifty.common.util;
 using thrifty.feature.smithing_scrap.data;
 using thrifty.feature.smithing_scrap.hax;
 
@@ -37,8 +38,12 @@ internal static class SmithingScrapFeature {
   /// VS API instance.
   /// </param>
   internal static void register(Harmony harmony, ICoreAPI api) {
-    if (patched)
+    if (patched) {
+      Logs.trace("{0}.register called after patches have already been applied", nameof(SmithingScrapFeature));
       return;
+    }
+
+    Logs.trace("{0}.register applying patches", nameof(SmithingScrapFeature));
 
     // Register the attribute type regardless of whether we are server or client
     // side as the data will unfortunately be synchronized between the two.
@@ -60,13 +65,17 @@ internal static class SmithingScrapFeature {
   internal static void deregister(Harmony harmony, ICoreAPI api) {
     // Harmony patches should only be registered on the server side.
     if (patched) {
+      Logs.trace("{0}.deregister removing patches", nameof(SmithingScrapFeature));
+
       if (api is ICoreServerAPI) {
-        BlockEntityAnvilHax.unpatch(harmony);
+        BlockAnvilHax.unpatch(harmony);
       }
 
-      BlockAnvilHax.unpatch(harmony);
+      BlockEntityAnvilHax.unpatch(harmony, api.Side);
 
       patched = false;
+    } else {
+      Logs.trace("{0}.deregister called when not yet patched", nameof(SmithingScrapFeature));
     }
   }
 }

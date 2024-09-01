@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
+using thrifty.common;
 using thrifty.common.data;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
@@ -32,6 +33,8 @@ internal class BlockEntityAnvilHax {
     var type = typeof(BlockEntityAnvil);
 
     if (side.IsServer()) {
+      Logs.trace("patching {0} for server side", type.Name);
+
       var onSplit = type.GetMethod(nameof(BlockEntityAnvil.OnSplit))!;
       var checkIfFinished = type.GetMethod(nameof(BlockEntityAnvil.CheckIfFinished))!;
 
@@ -40,15 +43,23 @@ internal class BlockEntityAnvilHax {
         (checkIfFinished, harmony.Patch(checkIfFinished, new(checkIfFinishedPrefix))),
       };
     } else {
+      Logs.trace("patching {0} for client side", type.Name);
+
       var openDialog = type.GetMethod("OpenDialog", BindingFlags.NonPublic | BindingFlags.Instance);
 
       patchedMethods = openDialog == null
         ? Array.Empty<(MethodInfo, MethodInfo)>()
-        : new[] { (openDialog, harmony.Patch(openDialog, postfix: new(openDialog))) };
+        : new[] { (openDialog: openDialog, harmony.Patch(openDialog, postfix: new(openDialogPatch))) };
     }
   }
 
-  internal static void unpatch(Harmony harmony) {
+  internal static void unpatch(Harmony harmony, EnumAppSide side) {
+    if (side.IsServer()) {
+      Logs.trace("unpatching {0} for server side", nameof(BlockEntityAnvil));
+    } else {
+      Logs.trace("unpatching {0} for client side", nameof(BlockEntityAnvil));
+    }
+
     foreach (var (og, patch) in patchedMethods) {
       harmony.Unpatch(og, patch);
     }
@@ -272,7 +283,7 @@ internal class BlockEntityAnvilHax {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
 
-  private static void openDialog(ItemStack? ingredient, GuiDialog? ___dlg) {
+  private static void openDialogPatch(ItemStack? ingredient, GuiDialog? ___dlg) {
     if (ingredient == null || ___dlg is not GuiDialogBlockEntityRecipeSelector)
       return;
 
@@ -296,13 +307,13 @@ internal class BlockEntityAnvilHax {
       string message;
 
       if (data.Value.voxels > grantedVoxels)
-        message = "Requires additional material."; // TODO: i8n
+        message = Lang.Feat.SmithingScrap.RecipeList.HoverHint.NeedMore.resolve();
       else {
         var (salvaged, lost) = Smithy.calculateWaste(grantedVoxels - data.Value.voxels);
         // TODO: i8n
         message = lost > 0
-          ? string.Format("{0} salvageable bits, {1} units of material lost", salvaged, lost.toUserString())
-          : string.Format("{0} salvageable bits", salvaged);
+          ? Lang.Feat.SmithingScrap.RecipeList.HoverHint.SomeLoss.resolve(salvaged, lost.toUserString())
+          : Lang.Feat.SmithingScrap.RecipeList.HoverHint.NoLoss.resolve(salvaged);
       }
 
       if (item.Description.Length == 0)

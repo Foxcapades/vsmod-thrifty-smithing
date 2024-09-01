@@ -1,0 +1,26 @@
+{
+  // smithing recipe hover hint for case when a single ingot/plate is not enough
+  // material to craft a recipe alone (recipe will require more input).
+  "ZTIc02-P": "Requires additional material.",
+
+  // smithing recipe hover hint for case when the salvageable material from a
+  // recipe is cleanly divisible by the amount of material per bit.
+  //
+  // Parameters:
+  //   {0} : int - number of bits that will be salvaged on successful completion
+  //               of the recipe.
+  "xrs9F9Z8": "{0} salvageable bits.",
+
+  // smithing recipe hover hint for case when the salvageable material from a
+  // recipe is NOT cleanly divisible by the amount of material per bit, meaning
+  // there will be some material lost.
+  //
+  // Parameters:
+  //   {0} : int - number of bits that will be salvaged on successful completion
+  //         of the target recipe.
+  //
+  //   {1} : string - A pre-formatted float value representing the amount of
+  //         material that will be lost on successful completion of the target
+  //         recipe.  The value will contain [0..2] decimal places.
+  "SgnVvN3r": "{0} salvageable bits, {1} units of material lost."
+}

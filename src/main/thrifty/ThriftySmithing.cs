@@ -5,6 +5,7 @@ using Vintagestory.API.Common;
 using thrifty.common.config;
 using thrifty.common.util;
 using thrifty.feature.smithing_scrap;
+using Vintagestory.API.Config;
 
 namespace thrifty;
 
@@ -58,10 +59,8 @@ public class ThriftySmithing : ModSystem {
   }
 
   private static void applyHarmonyPatches(string id, ICoreAPI api) {
-    if (!Harmony.HasAnyPatches(id)) {
-      var harmony = new Harmony(id);
-
-      SmithingScrapFeature.register(harmony, api);
-    }
+    var harmony = new Harmony(id);
+    SmithingScrapFeature.deregister(harmony, api);
+    SmithingScrapFeature.register(harmony, api);
   }
 }

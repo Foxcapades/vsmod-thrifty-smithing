@@ -13,16 +13,22 @@ internal class BlockAnvilHax {
   private static MethodInfo? onBlockInteractStart;
 
   internal static void patch(Harmony harmony) {
+    var target = typeof(BlockAnvil);
+    Logs.trace("patching {0}", target.Name);
     onBlockInteractStart = harmony.Patch(
-      typeof(BlockAnvil).GetMethod(nameof(BlockAnvil.OnBlockInteractStart)),
+      target.GetMethod(nameof(BlockAnvil.OnBlockInteractStart)),
       new(prefix),
       new(postfix)
     );
   }
 
   internal static void unpatch(Harmony harmony) {
-    harmony.Unpatch(typeof(BlockAnvil).GetMethod(nameof(BlockAnvil.OnBlockInteractStart)), onBlockInteractStart);
-    onBlockInteractStart = null;
+    if (onBlockInteractStart is not null) {
+      var target = typeof(BlockAnvil);
+      Logs.trace("unpatching {0}", target.Name);
+      harmony.Unpatch(target.GetMethod(nameof(BlockAnvil.OnBlockInteractStart)), onBlockInteractStart);
+      onBlockInteractStart = null;
+    }
   }
 
   private static void prefix(

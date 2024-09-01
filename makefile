@@ -22,8 +22,13 @@ endif
 ZIP_NAME_BASE := $(shell echo $(ASSEMBLY_NAME) | sed 's/\([A-Z]\)/-\L\1/g;s/^-//')
 
 CSHARP_FILES := $(shell find src -type f -name '*.cs')
-BUNDLED_FILES := modinfo.json
-INCLUDED_FILES := $(STAGING_ROOT)/modicon.png $(STAGING_ROOT)/modinfo.json
+
+GAME_ASSET_SOURCE_DIR   := ${PWD}/assets/game
+GAME_ASSET_SOURCE_FILES := $(shell find $(GAME_ASSET_SOURCE_DIR) -type f)
+GAME_ASSET_TARGET_DIR   := $(STAGING_ROOT)/assets/$(MOD_ID)
+GAME_ASSET_TARGET_FILES := $(foreach target,$(GAME_ASSET_SOURCE_FILES),$(GAME_ASSET_TARGET_DIR)$(subst $(GAME_ASSET_SOURCE_DIR),,$(target)))
+
+INCLUDED_FILES := $(STAGING_ROOT)/modicon.png $(STAGING_ROOT)/modinfo.json $(GAME_ASSET_TARGET_FILES)
 
 #
 # Meta Targets
@@ -49,6 +54,7 @@ default:
 	@echo "Release Bundle = $(RELEASE_ZIP_TARGET)"
 	@echo
 	@echo "C# Files       = $(shell echo $(CSHARP_FILES) | wc -w)"
+	@echo "Asset Files    = $(subst $(GAME_ASSET_SOURCE_DIR),,$(GAME_ASSET_SOURCE_FILES))"
 	@echo
 	@echo "Debug Outputs  = $(DEBUG_OUTPUT_FILES)"
 	@echo
@@ -123,19 +129,26 @@ clean:
 TESTING_DATA_PATH := ${PWD}/testing
 TEST_MOD_ZIP_NAME := test-target.zip
 
+define install-mods =
+mkdir -p $(TESTING_DATA_PATH)/Mods
+if [ ! -f $(TESTING_DATA_PATH)/Mods/Knapster_v2.11.1.zip ]; then \
+  wget 'https://mods.vintagestory.at/download?fileid=24598' -O $(TESTING_DATA_PATH)/Mods/Knapster_v2.11.1.zip; \
+fi
+endef
+
 .PHONY: resume-playtest
 resume-playtest: check-env
 	@$${VINTAGE_STORY}/Vintagestory --dataPath=$(TESTING_DATA_PATH)
 
 .PHONY: dev-playtest
 dev-playtest: check-env $(TESTING_DATA_PATH)/clientsettings.json $(DEBUG_ZIP_TARGET)
-	@mkdir -p $(TESTING_DATA_PATH)/Mods
+	@$(install-mods)
 	@cp $(DEBUG_ZIP_TARGET) $(TESTING_DATA_PATH)/Mods/$(TEST_MOD_ZIP_NAME)
 	@$${VINTAGE_STORY}/Vintagestory --dataPath=$(TESTING_DATA_PATH)
 
 .PHONY: prod-playtest
 prod-playtest: check-env $(TESTING_DATA_PATH)/clientsettings.json $(RELEASE_ZIP_TARGET)
-	@mkdir -p $(TESTING_DATA_PATH)/Mods
+	@$(install-mods)
 	@cp $(RELEASE_ZIP_TARGET) $(TESTING_DATA_PATH)/Mods/$(TEST_MOD_ZIP_NAME)
 	@$${VINTAGE_STORY}/Vintagestory --dataPath=$(TESTING_DATA_PATH)
 
@@ -179,6 +192,10 @@ $(STAGING_ROOT)/modicon.png: $(STAGING_ROOT)
 
 $(STAGING_ROOT)/modinfo.json: assets/templates/modinfo.base.json $(STAGING_ROOT) $(FALLBACK_JQ)
 	@$(JQ) '.modid = "$(MOD_ID)" | .version = "$(MOD_VERSION)" | .name = "$(ASSEMBLY_NAME)"' $< > $@
+
+$(GAME_ASSET_TARGET_DIR)/%.json: $(GAME_ASSET_SOURCE_DIR)/%.json
+	@mkdir -p $(@D)
+	@sed 's#^ *//.*##g' $^ | $(JQ) -c . > $@
 
 $(RELEASE_ROOT):
 	@mkdir -p "$@"
