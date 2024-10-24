@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ThriftySmithing.Data;
 using Vintagestory.API.Datastructures;
 using Vintagestory.GameContent;
@@ -14,15 +15,25 @@ public static class XBlockEntityAnvil {
   public static void clearWorkData(this BlockEntityAnvil anvil) =>
     anvil.WorkItemStack?.Attributes?.RemoveAttribute(ThriftySmithing.WorkDataKey);
 
-  public static ITreeAttribute? getExtensionData(this BlockEntityAnvil anvil) =>
-    (ITreeAttribute?) anvil.WorkItemStack?.Attributes?[ThriftySmithing.WorkDataModifierKey];
+  public static List<(string, ITreeAttribute)> findExtensionData(this BlockEntityAnvil anvil) {
+    var attrs = anvil.WorkItemStack?.Attributes;
 
-  public static void setExtensionData(this BlockEntityAnvil anvil, ITreeAttribute data) =>
-    anvil.WorkItemStack!.Attributes![ThriftySmithing.WorkDataModifierKey] = data;
+    if (attrs == null || attrs.Count == 0)
+      return new List<(string, ITreeAttribute)>(0);
 
-  public static void setExtensionData(this BlockEntityAnvil anvil, WorkDataModifiers modifier) =>
-    anvil.WorkItemStack!.Attributes![ThriftySmithing.WorkDataModifierKey] = modifier.toAttribute();
+    var results = new List<(string, ITreeAttribute)>(attrs.Count);
 
-  public static void clearExtensionData(this BlockEntityAnvil anvil) =>
-    anvil.WorkItemStack?.Attributes?.RemoveAttribute(ThriftySmithing.WorkDataModifierKey);
+    foreach (var kv in attrs) {
+      if (kv.Key.StartsWith(ThriftySmithing.WorkDataModifierPrefix)) {
+        if (kv.Value is ITreeAttribute val) {
+          results.Add((kv.Key[ThriftySmithing.WorkDataModifierPrefix.Length..], val));
+        }
+      }
+    }
+
+    return results;
+  }
+
+  public static void addExtensionData(this BlockEntityAnvil anvil, string key, WorkDataModifiers modifier) =>
+    anvil.WorkItemStack!.Attributes![ThriftySmithing.WorkDataModifierPrefix + key] = modifier.toAttribute();
 }

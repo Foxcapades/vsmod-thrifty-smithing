@@ -83,12 +83,12 @@ internal class BlockEntityAnvilHax {
       // the recipe.
       var data = __instance.getWorkData();
 
-      var extensionData = __instance.getExtensionData();
+      var extensionData = __instance.findExtensionData();
 
       var voxels = 0;
 
       if (!data.HasValue) {
-        if (extensionData == null)
+        if (extensionData.Count == 0)
           return;
 
         var (v, i, p) = sumExtensionData(WorkDataModifiers.fromDataTree(extensionData));
@@ -100,7 +100,7 @@ internal class BlockEntityAnvilHax {
 
         data = tmp;
         voxels = v;
-      } else if (extensionData != null) {
+      } else if (extensionData.Count > 0) {
         var tmp = data.Value;
 
         var (v, i, p) = sumExtensionData(WorkDataModifiers.fromDataTree(extensionData));
@@ -169,14 +169,14 @@ internal class BlockEntityAnvilHax {
 
   private static int calculateVoxelsForWork(BlockEntityAnvil anvil) {
     var data = anvil.getWorkData();
-    var extensionData = anvil.getExtensionData();
+    var extensionData = anvil.findExtensionData();
 
     // If there is no work data assigned by ThriftySmithing itself.
     if (!data.HasValue) {
       Logs.trace("no work data");
 
       // AND there is no data wired in from another plugin
-      if (extensionData == null) {
+      if (extensionData.Count == 0) {
         Logs.trace("no extension data");
         return 0;
       }
@@ -193,7 +193,7 @@ internal class BlockEntityAnvilHax {
       return Math.Max(0, Smithy.calculateWasteVoxels(tmp, anvil.SelectedRecipe) + v);
     }
 
-    if (extensionData == null) {
+    if (extensionData.Count == 0) {
       Logs.trace("no extension data");
       return Smithy.calculateWasteVoxels(data.Value, anvil.SelectedRecipe);
     }
