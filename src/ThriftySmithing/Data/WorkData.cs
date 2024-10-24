@@ -4,7 +4,7 @@ using Vintagestory.API.Datastructures;
 
 namespace ThriftySmithing.Data;
 
-internal struct WorkData : IAttribute {
+public struct WorkData : IAttribute {
   internal byte ingotCount = 0;
 
   internal byte plateCount = 0;

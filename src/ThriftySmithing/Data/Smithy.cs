@@ -9,7 +9,7 @@ namespace ThriftySmithing.Data;
  * Data access facade and utility methods.
  * </summary>
  */
-internal static class Smithy {
+public static class Smithy {
 
   #region Config-Based Values
   // Config-based values are values that are from or are derived solely from the
@@ -63,20 +63,23 @@ internal static class Smithy {
   // Calculations used when determining the amount of material to return to the
   // player after smithing has ended.
 
-  internal static int calculateWasteReturnBits(WorkData data, SmithingRecipe recipe) =>
-    (int) (calculateWasteMaterial(data, recipe) / MaterialUnitsPerBit);
+  // <summary>
+  //
+  // </summary>
+  public static int calculateWasteVoxels(WorkData data, SmithingRecipe recipe) =>
+    calculateInputVoxels(data) - getVoxelCount(recipe);
 
-  internal static int calculateTotalInputBits(WorkData data) =>
+  public static int calculateWasteReturnBits(int voxels) =>
+    (int) (calculateWasteMaterial(voxels) / MaterialUnitsPerBit);
+
+  private static int calculateTotalInputBits(WorkData data) =>
     (int) (calculateTotalInputMaterial(data) / MaterialUnitsPerBit);
 
   private static int calculateInputVoxels(WorkData data) =>
     data.ingotCount * VoxelsPerIngot + data.plateCount * VoxelsPerPlate;
 
-  private static int calculateWasteVoxels(WorkData data, SmithingRecipe recipe) =>
-    calculateInputVoxels(data) - getVoxelCount(recipe);
-
-  private static float calculateWasteMaterial(WorkData data, SmithingRecipe recipe) =>
-    calculateWasteVoxels(data, recipe) * MaterialUnitsPerVoxel * MaterialUnitsRecoveredModifier;
+  private static float calculateWasteMaterial(int voxels) =>
+    voxels * MaterialUnitsPerVoxel * MaterialUnitsRecoveredModifier;
 
   private static float calculateTotalInputMaterial(WorkData data) =>
     data.ingotCount * MaterialUnitsPerIngot + data.plateCount * MaterialUnitsPerPlate;

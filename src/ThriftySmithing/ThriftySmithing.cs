@@ -17,6 +17,8 @@ public class ThriftySmithing : ModSystem {
 
   internal const string WorkDataKey = "ef:ts:workData";
 
+  internal const string WorkDataModifierKey = "ef:ts:workData:modifiers";
+
   internal static readonly byte InternalAttributeID = (byte) (TreeAttribute.AttributeIdMapping.Count + 1);
 
   internal static ThriftySmithingConfig Config =>

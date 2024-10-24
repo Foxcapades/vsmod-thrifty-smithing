@@ -1,9 +1,11 @@
 namespace ThriftySmithing.Data;
 
-internal static class Const {
-  internal const string DefaultMetalBitPathPrefix = "metalbit";
+public static class Const {
+  public const string DefaultMetalBitPathPrefix = "metalbit";
 
-  internal const string DefaultMetalPlatePathPrefix = "metalplate";
+  public const string DefaultMetalPlatePathPrefix = "metalplate";
 
-  internal const string DefaultIngotPathPrefix = "ingot";
+  public const string DefaultIngotPathPrefix = "ingot";
+
+  public const string TemperatureAttributeKey = "temperature";
 }
