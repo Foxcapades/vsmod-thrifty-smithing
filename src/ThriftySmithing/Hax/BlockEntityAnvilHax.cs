@@ -157,12 +157,14 @@ internal class BlockEntityAnvilHax {
     }
 
     var voxels = calculateVoxelsForWork(__instance);
+    var bits = Smithy.calculateWasteReturnBits(voxels);
     Logs.trace("waste voxels: {0}", voxels);
+    Logs.trace("bits to return: {0}", bits);
 
     if (byPlayer is null)
-      BitGen.issueBits(Smithy.calculateWasteReturnBits(voxels), __instance);
+      BitGen.issueBits(bits, __instance);
     else
-      BitGen.issueBits(Smithy.calculateWasteReturnBits(voxels), byPlayer, __instance);
+      BitGen.issueBits(bits, byPlayer, __instance);
 
     __instance.clearWorkData();
   }
