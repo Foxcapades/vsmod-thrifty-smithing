@@ -158,7 +158,6 @@ internal class BlockAnvilHax {
       this.size = size;
     }
 
-    public override string ToString() =>
-      string.Format("StackInfo(type: {0}, code: {1}, pos: {2}, size: {3})", type, code, pos, size);
+    public override string ToString() => $"StackInfo(type: {type}, code: {code}, pos: {pos}, size: {size})";
   }
 }
