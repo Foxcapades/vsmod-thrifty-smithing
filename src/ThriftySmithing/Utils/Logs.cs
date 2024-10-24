@@ -12,7 +12,7 @@ internal static class Logs {
   private static ILogger? logger;
 
   #if ENABLE_DEBUG_FEATURES
-  private const string TracePattern = "{0}: {1}";
+  private const string TracePattern = "{0}#{1}: {2}";
   #endif
 
   internal static void init(ILogger logger) {
@@ -23,7 +23,7 @@ internal static class Logs {
   internal static void trace(string message) {
     #if ENABLE_DEBUG_FEATURES
     var frame = new StackFrame(1);
-    logger!.VerboseDebug(TracePattern, frame.GetMethod()!.Name, message);
+    logger!.VerboseDebug(TracePattern, frame.GetType().Name, frame.GetMethod()!.Name, message);
     #endif
   }
 
@@ -31,7 +31,7 @@ internal static class Logs {
   internal static void trace(string format, object p1) {
     #if ENABLE_DEBUG_FEATURES
     var frame = new StackFrame(1);
-    logger!.VerboseDebug(TracePattern, frame.GetMethod()!.Name, string.Format(format, p1));
+    logger!.VerboseDebug(TracePattern, frame.GetType().Name, frame.GetMethod()!.Name, string.Format(format, p1));
     #endif
   }
 
@@ -39,7 +39,7 @@ internal static class Logs {
   internal static void trace(string format, object p1, object p2) {
     #if ENABLE_DEBUG_FEATURES
     var frame = new StackFrame(1);
-    logger!.VerboseDebug(TracePattern, frame.GetMethod()!.Name, string.Format(format, p1, p2));
+    logger!.VerboseDebug(TracePattern, frame.GetType().Name, frame.GetMethod()!.Name, string.Format(format, p1, p2));
     #endif
   }
 

@@ -44,6 +44,8 @@ internal class BlockAnvilHax {
     if (type == ItemType.Irrelevant)
       return;
 
+    Logs.trace("generating stack info state");
+
     // If we got here, then we know the player shift-clicked an anvil entity
     // with an item in hand that we may care about.
     //
@@ -72,6 +74,8 @@ internal class BlockAnvilHax {
     // 3. Only run if we are executing on the server side.
     if (!__result || __state is null || world.Side.IsClient())
       return;
+
+    Logs.trace("using stack info state: {0}", __state);
 
     // Grab the item stack at the hotbar position that was active at the start
     // of the patched method call.
@@ -153,5 +157,8 @@ internal class BlockAnvilHax {
       this.pos = pos;
       this.size = size;
     }
+
+    public override string ToString() =>
+      string.Format("StackInfo(type: {0}, code: {1}, pos: {2}, size: {3})", type, code, pos, size);
   }
 }

@@ -8,4 +8,6 @@ public static class Const {
   public const string DefaultIngotPathPrefix = "ingot";
 
   public const string TemperatureAttributeKey = "temperature";
+
+  public const string TemperatureLastUpdateAttributeKey = "temperatureLastUpdate";
 }

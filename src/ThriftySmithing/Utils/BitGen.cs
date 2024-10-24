@@ -18,6 +18,8 @@ public static class BitGen {
 
     applyTemperature(stack, anvil);
 
+    Logs.trace("generating stack: {0}", stack);
+
     if (item != null)
       world.SpawnItemEntity(stack, anvil.Pos.ToVec3d());
   }
@@ -36,6 +38,8 @@ public static class BitGen {
 
     applyTemperature(stack, anvil);
 
+    Logs.trace("generating stack: {0}", stack);
+
     if (!player.InventoryManager.TryGiveItemstack(stack, true))
       world.SpawnItemEntity(stack, player.Entity.Pos.XYZ);
   }
@@ -46,9 +50,24 @@ public static class BitGen {
   }
 
   private static void applyTemperature(ItemStack stack, BlockEntityAnvil anvil) {
-    var temp = anvil.WorkItemStack.Attributes.TryGetFloat(Const.TemperatureAttributeKey);
+    if (!anvil.WorkItemStack.Attributes.HasAttribute(Const.TemperatureAttributeKey)) {
+      Logs.debug("work item has no temperature attribute");
+      return;
+    }
 
-    if (temp.HasValue)
-      stack.Attributes[Const.TemperatureAttributeKey] = new FloatAttribute(temp.Value);
+    var tempContainer = (ITreeAttribute) anvil.WorkItemStack.Attributes[Const.TemperatureAttributeKey];
+    var temp = tempContainer.TryGetFloat(Const.TemperatureAttributeKey);
+
+    if (temp.HasValue) {
+      Logs.debug("applying temperature {0} to stack", temp.Value);
+      stack.Attributes[Const.TemperatureAttributeKey] = new TreeAttribute {
+        [Const.TemperatureAttributeKey] = new FloatAttribute(temp.Value),
+        [Const.TemperatureLastUpdateAttributeKey] = tempContainer.HasAttribute(Const.TemperatureLastUpdateAttributeKey)
+          ? tempContainer[Const.TemperatureLastUpdateAttributeKey]
+          : new DoubleAttribute(anvil.Api.World.Calendar.TotalHours),
+      };
+    } else {
+      Logs.debug("work item has no temperature value");
+    }
   }
 }

@@ -41,5 +41,5 @@ public struct WorkData : IAttribute {
 
   public IAttribute Clone() => new WorkData(ingotCount, plateCount);
 
-  public override string ToString() => $"WorkData(ingots={ingotCount}, plates={plateCount})";
+  public override string ToString() => $"WorkData(ingots: {ingotCount}, plates: {plateCount})";
 }

@@ -28,14 +28,14 @@ public record struct WorkDataModifiers(sbyte voxels, sbyte ingots, sbyte plates)
         continue;
 
       if (kvs.Current.Value is not ITreeAttribute) {
-        Logs.warn("work data extension point contained an invalid value under key {}", kvs.Current.Key);
+        Logs.warn("work data extension point contained an invalid value under key {0}", kvs.Current.Key);
         continue;
       }
 
       var mod = fromAttribute(kvs.Current.Key, (ITreeAttribute) kvs.Current.Value);
 
       if (mod.isBlank)
-        Logs.info("skipping extension point key {} as it is blank (all zero values)", kvs.Current.Key);
+        Logs.info("skipping extension point key {0} as it is blank (all zero values)", kvs.Current.Key);
       else
         hopeful[i++] = mod;
     }
@@ -58,10 +58,10 @@ public record struct WorkDataModifiers(sbyte voxels, sbyte ingots, sbyte plates)
       case null:
         return 0;
       case > 127:
-        Logs.error("extension point {} contains a value for key {} that is greater than 255: {}", mod, key, value);
+        Logs.error("extension point {0} contains a value for key {1} that is greater than 255: {2}", mod, key, value);
         return 0;
       case < -128:
-        Logs.error("extension point {} contains a value for key {} that is less than 0: {}", mod, key, value);
+        Logs.error("extension point {0} contains a value for key {1} that is less than 0: {2}", mod, key, value);
         return 0;
       default:
         return (sbyte) value;

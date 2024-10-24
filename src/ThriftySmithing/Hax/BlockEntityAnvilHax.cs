@@ -76,6 +76,8 @@ internal class BlockEntityAnvilHax {
       && Smithy.recipeIsAllowed(__instance.SelectedRecipe)
       && !hasRemainingVoxels(__instance)
     ) {
+      Logs.trace("paying attention to BlockEntityAnvil.OnSplit postfix");
+
       // If all the voxels were split off of the work item, then the recipe has
       // been aborted.  Spit out bits equivalent to the input materials used for
       // the recipe.
@@ -92,8 +94,8 @@ internal class BlockEntityAnvilHax {
         var (v, i, p) = sumExtensionData(WorkDataModifiers.fromDataTree(extensionData));
 
         var tmp = new WorkData {
-          ingotCount = (byte) Math.Min(0, i),
-          plateCount = (byte) Math.Min(0, p),
+          ingotCount = (byte) Math.Max(0, i),
+          plateCount = (byte) Math.Max(0, p),
         };
 
         data = tmp;
@@ -103,8 +105,8 @@ internal class BlockEntityAnvilHax {
 
         var (v, i, p) = sumExtensionData(WorkDataModifiers.fromDataTree(extensionData));
 
-        tmp.ingotCount += (byte) Math.Min(0, i);
-        tmp.plateCount += (byte) Math.Min(0, p);
+        tmp.ingotCount += (byte) Math.Max(0, i);
+        tmp.plateCount += (byte) Math.Max(0, p);
 
         data = tmp;
         voxels = v;
@@ -112,7 +114,7 @@ internal class BlockEntityAnvilHax {
 
       if (data.Value.hasInputs && shouldPrintBits(__instance))
         BitGen.issueBits(Smithy.calculateWasteReturnBits(
-          Math.Min(0, Smithy.calculateWasteVoxels(data.Value, __instance.SelectedRecipe) + voxels)),
+          Math.Max(0, Smithy.calculateWasteVoxels(data.Value, __instance.SelectedRecipe) + voxels)),
           __instance
         );
 
@@ -145,15 +147,22 @@ internal class BlockEntityAnvilHax {
     if (__instance.Api.World.Side.IsClient() || __instance.SelectedRecipe == null || !workCompleted(__instance))
       return;
 
+    Logs.trace("paying attention to BlockEntityAnvil.CheckIfFinished prefix");
+
     var data = __instance.getWorkData();
 
-    if (!data.HasValue || !shouldPrintBits(__instance))
+    if (!data.HasValue || !shouldPrintBits(__instance)) {
+      Logs.trace("skipping early: data.HasValue={0}, shouldPrintBits={1}", data.HasValue, shouldPrintBits(__instance));
       return;
+    }
+
+    var voxels = calculateVoxelsForWork(__instance);
+    Logs.trace("waste voxels: {0}", voxels);
 
     if (byPlayer is null)
-      BitGen.issueBits(Smithy.calculateWasteReturnBits(calculateVoxelsForWork(__instance)), __instance);
+      BitGen.issueBits(Smithy.calculateWasteReturnBits(voxels), __instance);
     else
-      BitGen.issueBits(Smithy.calculateWasteReturnBits(calculateVoxelsForWork(__instance)), byPlayer, __instance);
+      BitGen.issueBits(Smithy.calculateWasteReturnBits(voxels), byPlayer, __instance);
 
     __instance.clearWorkData();
   }
@@ -164,32 +173,43 @@ internal class BlockEntityAnvilHax {
 
     // If there is no work data assigned by ThriftySmithing itself.
     if (!data.HasValue) {
+      Logs.trace("no work data");
+
       // AND there is no data wired in from another plugin
-      if (extensionData == null)
+      if (extensionData == null) {
+        Logs.trace("no extension data");
         return 0;
+      }
 
       var (v, i, p) = sumExtensionData(WorkDataModifiers.fromDataTree(extensionData));
 
       var tmp = new WorkData {
-        ingotCount = (byte) Math.Min(0, i),
-        plateCount = (byte) Math.Min(0, p),
+        ingotCount = (byte) Math.Max(0, i),
+        plateCount = (byte) Math.Max(0, p),
       };
 
-      return Math.Min(0, Smithy.calculateWasteVoxels(tmp, anvil.SelectedRecipe) + v);
+      Logs.trace("with extension data total sums to: Voxels({0}), {1}", v, tmp);
+
+      return Math.Max(0, Smithy.calculateWasteVoxels(tmp, anvil.SelectedRecipe) + v);
     }
 
-    if (extensionData != null) {
+    if (extensionData == null) {
+      Logs.trace("no extension data");
+      return Smithy.calculateWasteVoxels(data.Value, anvil.SelectedRecipe);
+    }
+
+    {
       var tmp = data.Value;
 
       var (v, i, p) = sumExtensionData(WorkDataModifiers.fromDataTree(extensionData));
 
-      tmp.ingotCount += (byte) Math.Min(0, i);
-      tmp.plateCount += (byte) Math.Min(0, p);
+      tmp.ingotCount += (byte) Math.Max(0, i);
+      tmp.plateCount += (byte) Math.Max(0, p);
 
-      return Math.Min(0, Smithy.calculateWasteVoxels(tmp, anvil.SelectedRecipe) + v);
+      Logs.trace("with extension data total sums to: Voxels({0}), {1}", v, tmp);
+
+      return Math.Max(0, Smithy.calculateWasteVoxels(tmp, anvil.SelectedRecipe) + v);
     }
-
-    return 0;
   }
 
   private static (int, int, int) sumExtensionData(WorkDataModifiers[] mods) {
