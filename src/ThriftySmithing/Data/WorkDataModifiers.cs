@@ -4,7 +4,7 @@ using Vintagestory.API.Datastructures;
 
 namespace ThriftySmithing.Data;
 
-public record struct WorkDataModifiers(sbyte voxels, sbyte ingots, sbyte plates) {
+public readonly record struct WorkDataModifiers(sbyte voxels, sbyte ingots, sbyte plates) {
   public const string VoxelKey = "voxels";
   public const string IngotKey = "ingots";
   public const string PlateKey = "plates";
