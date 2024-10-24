@@ -58,10 +58,10 @@ public record struct WorkDataModifiers(sbyte voxels, sbyte ingots, sbyte plates)
       case null:
         return 0;
       case > 127:
-        Logs.error("extension point {0} contains a value for key {1} that is greater than 255: {2}", mod, key, value);
+        Logs.error("extension point {0} contains a value for key {1} that is greater than 127: {2}", mod, key, value);
         return 0;
       case < -128:
-        Logs.error("extension point {0} contains a value for key {1} that is less than 0: {2}", mod, key, value);
+        Logs.error("extension point {0} contains a value for key {1} that is less than -128: {2}", mod, key, value);
         return 0;
       default:
         return (sbyte) value;

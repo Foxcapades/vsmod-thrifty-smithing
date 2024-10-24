@@ -63,9 +63,23 @@ public static class Smithy {
   // Calculations used when determining the amount of material to return to the
   // player after smithing has ended.
 
-  // <summary>
-  //
-  // </summary>
+  /// <summary>
+  /// Calculates the amount of voxels that would be wasted for the given inputs.
+  /// </summary>
+  ///
+  /// <param name="data">
+  /// A <c>WorkData</c> instance containing details about the inputs that went
+  /// onto the anvil.
+  /// </param>
+  ///
+  /// <param name="recipe">
+  /// Smithing recipe that is being crafted.  This value is used to determine
+  /// the number of voxels actually used by the recipe.
+  /// </param>
+  ///
+  /// <returns>
+  /// The number of voxels that would be wasted on completion of the recipe.
+  /// </returns>
   public static int calculateWasteVoxels(WorkData data, SmithingRecipe recipe) =>
     calculateInputVoxels(data) - getVoxelCount(recipe);
 
