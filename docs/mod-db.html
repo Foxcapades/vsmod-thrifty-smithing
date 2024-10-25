@@ -98,6 +98,47 @@
   </table>
 </section>
 <section>
+  <h3>Programmatic Extensibility</h3>
+  <p>ThriftySmithing currently offers a limited mechanism through which other
+    mods may alter the inputs used by ThriftySmithing to calculate metal bits
+    returned as scrap after smithing an item.</p>
+  <p>ThriftySmithing looks for <code>ITreeAttribute</code> instances in an
+    anvil’s work item (<code>BlockEntityAnvil.WorkItemStack</code>) attributes
+    whose names are prefixed with the string <code>ef:ts:workData:</code>. These
+    <code>ITreeAttribute</code> instances may contain sub-attribute integer
+    values under the keys <code>voxels</code>, <code>ingots</code>, and/or
+    <code>plates</code> which may contain positive or negative values that will
+    be applied to the scrap bit calculation.</p>
+  <pre><code data-lang="json">
+
+  </code></pre>
+  <table style="border-spacing: 5px;">
+    <caption class="title">Root Level</caption>
+    <colgroup>
+      <col style="width: 25%;">
+      <col style="width: 25%;">
+      <col style="width: 50%;">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Key</th>
+        <th>Type</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><p><code>ef:ts:workData:*</code></p></td>
+        <td><p><code>ITreeAttribute</code></p></td>
+        <td>
+          <p>A tree attribute that may contain the sub-attributes
+          <code>voxels</code>, <code>ingots</code>, <code>plates</code>.</p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<section>
   <h3>Compatibility</h3>
   <ul>
     <li>

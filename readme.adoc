@@ -1,4 +1,5 @@
 = image:assets/icons/icon-32.png[] Thrifty Smithing
+:source-highlighter: highlightjs
 :vs-url: https://www.vintagestory.at/
 
 A link:{vs-url}[VintageStory] mod to recover scrap metal from the smithing
@@ -78,6 +79,68 @@ Valid value range: `[0.0..1.0]` (max precision of ~4 digits)
 For example setting this to `["game:knifeblade-copper"]` would mean that players
 are not given any scrap metal back when crafting a copper knife blade.
 |===
+
+== Extending / Augmenting Thrifty Smithing
+
+ThriftySmithing currently offers a limited mechanism through which other mods
+may alter the inputs used by ThriftySmithing to calculate metal bits returned as
+scrap after smithing an item.
+
+ThriftySmithing looks for `ITreeAttribute` instances in an anvil's work item
+(`BlockEntityAnvil.WorkItemStack`) attributes whose names are prefixed with the
+string `ef:ts:workData:`.  These `ITreeAttribute` instances may contain
+sub-attributes integer values under the keys `voxels`, `ingots`, and/or `plates`
+which may contain positive or negative values that will be applied to the scrap
+bit calculation.
+
+.Example Extension
+[source, csharp]
+----
+// Add a bunch of extra voxels to the scrap bit calculation
+void SetThriftySmithingVoxels(BlockEntityAnvil anvil)
+{
+  anvil.WorkItemStack.Attributes["ef:ts:workData:myMod"] = new TreeAttribute
+  {
+      ["voxels"] = new IntAttribute(36),
+  }
+}
+----
+
+.Type Spec
+--
+.Root Level
+[%header, cols="3m,3m,6"]
+|===
+| Key | Type | Notes
+
+| ef:ts:workData:*
+| ITreeAttribute
+| A tree attribute that may contain the sub attributes `voxels`, `ingots`,
+`plates`.
+|===
+
+.Sub Attributes
+[%header, cols="3m,3m,6"]
+|===
+| Key | Type | Notes
+
+| voxels
+| IntAttribute
+| A positive or negative value in the range `[-128..127]` that may be provided
+to add or subtract from the scrap voxels for a smithing recipe.
+
+| ingots
+| IntAttribute
+|  A positive or negative value in the range `[-128..127]` that may be provided
+to add or subtract from the count of input ingots for a smithing recipe.
+
+| plates
+| IntAttribute
+| A positive or negative value in the range `[-128..127]` that may be provided
+to add or subtract from the count of input metal plates for a smithing recipe.
+|===
+--
+
 
 == Compatibility
 
